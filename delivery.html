@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <title>InstaDROP — Local delivery</title>
+  <style>
+    :root{color-scheme:light;--ink:#18212b;--muted:#65717f;--line:#e3e7ec;--paper:#fff;--wash:#f5f7f9;--red:#b91527;--red-dark:#85101d;--green:#226b45;--navy:#172638;--page-background:#f7f8fa;--surface:#fff;--surface-soft:#f7f8fa;--surface-hover:#fffafa;--soft-accent:#fff5f5;--soft-accent-line:#e6c6c8;--note-background:#fcf8f1;--note-ink:#63543d;--note-line:#eadfcf}
+    *{box-sizing:border-box}
+    *[hidden]{display:none!important}
+    body{margin:0;background:#f7f8fa;color:var(--ink);font:14px/1.5 "Segoe UI",Arial,Helvetica,sans-serif}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .wrap{width:min(1300px,calc(100% - 48px));margin:auto}
+    .site-header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 3px 14px #18263808}
+    .head-main{min-height:76px;display:grid;grid-template-columns:220px minmax(220px,1fr) minmax(240px,440px) auto;align-items:center;gap:24px}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .brand-mark{width:40px;height:40px;background:var(--red);color:white;display:grid;place-items:center;font-size:19px;font-weight:800;border-radius:10px;box-shadow:0 4px 10px #b9152725}
+    .brand-name{font-size:19px;font-weight:750;letter-spacing:-.55px;color:var(--navy)}
+    .brand-sub{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+    .deliver-to{font-size:11px;color:var(--muted)}
+    .deliver-to strong{display:block;color:var(--ink);font-size:13px;font-weight:700}
+    .location-entry{border:0;border-bottom:1px dashed #aaa;padding:1px 0;background:none;color:var(--ink);font-weight:700;width:160px}
+    .search{height:44px;border:1px solid var(--line);border-radius:9px;background:#f7f8fa;display:flex;align-items:center;gap:10px;padding:0 13px}
+    .search input{width:100%;border:0;outline:0;background:transparent}
+    .search:focus-within{border-color:#b9a2a4;background:white}
+    .cart-button{position:relative;background:var(--red);color:white;border:0;border-radius:8px;padding:11px 16px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px #b9152720}
+    .cart-count{display:inline-grid;place-items:center;margin-left:7px;min-width:21px;height:21px;border-radius:99px;background:white;color:var(--red);font-size:11px}
+    .cart-label-mobile{display:none}
+    .main-nav{display:flex;gap:27px;height:47px;align-items:stretch}
+    .nav-button{position:relative;border:0;background:none;color:#53606d;padding:0 2px;font-weight:650}
+    .nav-button.active{color:var(--red)}
+    .nav-button.active:after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--red)}
+    main{padding:28px 0 72px}
+    .service-note{display:flex;align-items:center;gap:8px;color:#526174;background:white;border:1px solid var(--line);border-radius:9px;padding:11px 14px;font-size:12px;margin-bottom:22px}
+    .service-note strong{color:var(--navy)}
+    .hero{position:relative;min-height:220px;overflow:hidden;border-radius:12px;background:#211719;color:white;padding:35px 38px;display:flex;align-items:center;margin-bottom:22px}
+    .hero:after{content:"";position:absolute;right:7%;top:-90px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,#a92732 0,#66121c 54%,transparent 55%);opacity:.8}
+    .hero-copy{position:relative;z-index:1;max-width:560px}
+    .hero-kicker{color:#ffb7bd;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+    .hero h1{font-size:clamp(28px,4vw,42px);line-height:1.04;letter-spacing:-1.3px;margin:9px 0}
+    .hero p{color:#e2d9d9;margin:0 0 18px;font-size:14px}
+    .hero-action{display:inline-block;text-decoration:none;border:0;border-radius:6px;padding:11px 15px;background:white;color:#211719;font-weight:700}
+    .hero-stamp{position:absolute;z-index:1;right:13%;font-size:92px;filter:drop-shadow(0 13px 15px #0005);transform:rotate(-10deg)}
+    .quick-links{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:27px}
+    .quick-link{border:1px solid var(--line);border-radius:9px;padding:15px;background:white;text-align:left;display:flex;align-items:center;gap:12px}
+    .quick-link:hover{border-color:#c5b5b6;background:#fffdfd}
+    .quick-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:9px;background:#f8eeee;font-size:22px}
+    .quick-link strong{display:block;font-size:13px}
+    .quick-link small{display:block;color:var(--muted);margin-top:3px}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:27px 0 14px}
+    .section-head h2{margin:0;font-size:22px;letter-spacing:-.55px;color:var(--navy)}
+    .section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .category-row{display:flex;gap:8px;overflow:auto;padding:2px 0 8px;scrollbar-width:thin}
+    .category{flex:0 0 auto;background:white;border:1px solid var(--line);border-radius:99px;padding:8px 13px;color:#484848;font-size:12px}
+    .category.active,.category:hover{border-color:#d6a5a9;background:#fff5f5;color:var(--red)}
+    .content-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:start;gap:23px}
+    .product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+    .shelf-list{display:grid;gap:22px}
+    .product-shelf{min-width:0}
+    .shelf-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}
+    .shelf-heading h3{margin:0;color:var(--navy);font-size:17px;letter-spacing:-.3px}
+    .shelf-heading small{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:2px}
+    .shelf-products{display:flex;gap:13px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
+    .shelf-products .product-card{flex:0 0 208px;scroll-snap-align:start}
+    .shelf-products .product-visual{height:142px}
+    .shelf-more{flex:0 0 145px;display:grid;place-items:center;align-content:center;gap:8px;min-height:235px;border:1px dashed #cbd4df;border-radius:11px;background:#fff;color:var(--red);font-weight:700}
+    .shelf-more span{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#fff2f3;font-size:26px}
+    .full-catalog-tab{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;border:1px solid #e6c6c8;border-radius:99px;background:#fff7f7;color:var(--red);padding:9px 14px;font-weight:750}
+    .full-catalog-tab:hover{background:#ffeded}
+    .browse-more{margin-top:24px;padding:20px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(120deg,#fff,#f8f9fb);display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .browse-more h3{margin:0;color:var(--navy);font-size:16px}
+    .browse-more p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .browse-more-links{display:flex;gap:8px;flex-wrap:wrap}
+    .browse-more-links button{border:1px solid var(--line);border-radius:7px;background:white;padding:9px 12px;color:var(--ink);font-weight:650}
+    .veg-quick{display:inline-flex;align-items:center;gap:8px;color:#40534a;font-size:12px;font-weight:700}
+    .veg-quick input{accent-color:#278250;width:17px;height:17px}
+    .catalog-controls{display:flex;align-items:center;gap:15px}
+    .settings-grid,.priority-layout,.payment-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;align-items:start}
+    .feature-card h3{margin-top:0}
+    .feature-card textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit;resize:vertical}
+    .settings-note,.payment-caveat{font-size:11px;color:var(--muted)}
+    .address-list{display:grid;gap:9px}
+    .address-entry{display:flex;align-items:start;gap:10px;padding:11px;border:1px solid var(--line);border-radius:8px}
+    .address-entry.is-active{border-color:#b9d8c3;background:#f4faf6}
+    .address-entry input{margin-top:3px;accent-color:var(--green)}
+    .address-entry strong{display:block}
+    .address-entry small{display:block;color:var(--muted);margin-top:3px}
+    .address-empty{padding:18px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:12px}
+    .preference-card{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}
+    .preference-card h3{margin:0 0 3px}
+    .preference-card p{margin:0;color:var(--muted);font-size:12px}
+    .switch-control{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:12px}
+    .switch-control input{position:absolute;opacity:0}
+    .switch-track{position:relative;width:42px;height:24px;border-radius:99px;background:#ccd3dc;transition:background .2s}
+    .switch-track:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .2s}
+    .switch-control input:checked+.switch-track{background:#318155}
+    .switch-control input:checked+.switch-track:after{transform:translateX(18px)}
+    .switch-control input:focus-visible+.switch-track{outline:3px solid #7ba8d5;outline-offset:2px}
+    .upi-qr{display:block;width:min(280px,100%);height:auto;margin:15px auto 10px;border:8px solid white;border-radius:8px;box-shadow:0 4px 16px #17263820;image-rendering:auto}
+    .qr-card{text-align:center}
+    .qr-card>p{font-size:12px;color:var(--muted)}
+    .upi-id{display:block;font-size:17px;letter-spacing:.3px;color:var(--navy)}
+    .payment-actions{display:flex;gap:8px;justify-content:center;margin:12px 0}
+    .pay-amount{max-width:230px;margin:12px auto;text-align:left}
+    .pay-amount input{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px}
+    .feature-card.priority-card{position:relative;overflow:hidden;min-height:320px;border:0;border-radius:18px;background:linear-gradient(135deg,#15191f 0%,#252a31 55%,#7d1726 100%);color:white;box-shadow:0 18px 36px #17263824}
+    .priority-card:after{content:"";position:absolute;right:-72px;top:-78px;width:250px;height:250px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 22px #ffffff0b,0 0 0 46px #ffffff08}
+    .priority-card>*{position:relative;z-index:1}
+    .feature-card.priority-card h3{margin:11px 0;color:white;font-size:26px;letter-spacing:-.7px}
+    .feature-card.priority-card p,.priority-card ul{color:#f2e9eb}
+    .feature-card.priority-card .priority-price{font-size:34px;color:white}
+    .feature-card.priority-card .priority-price small{color:#f2e9eb}
+    .priority-icon{display:inline-grid;place-items:center;width:48px;height:48px;border:1px solid #f4c86b;border-radius:12px;background:linear-gradient(145deg,#f4d791,#c6973a);color:#4d3510;font-size:27px;box-shadow:0 5px 14px #0003}
+    .priority-card .assistant-badge{border-color:#ffffff35;background:#ffffff16;color:#fff}
+    .priority-card .checkout-button{width:auto;min-width:220px;border:1px solid #f5dfaa;background:#f2d48f;color:#39280f}
+    .priority-card .checkout-button:hover{background:#ffdf9a}
+    .priority-card .priority-status{color:#fff3d4}
+    .pass-topline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .pass-label{font-size:10px;font-weight:800;letter-spacing:1.6px;color:#ffe1a0}
+    .pass-seal{width:37px;height:37px;display:grid;place-items:center;border:1px solid #ffe1a080;border-radius:50%;color:#ffe1a0;font-size:19px}
+    .pass-benefits{display:grid;gap:5px;margin:17px 0!important;padding:0!important;list-style:none}
+    .pass-benefits li:before{content:"✓";margin-right:8px;color:#ffe1a0;font-weight:800}
+    .pass-note{font-size:10px!important;color:#e4d8da!important}
+    .priority-price{font-size:28px;font-weight:800;color:var(--navy)}
+    .priority-price small{font-size:12px;font-weight:400;color:var(--muted)}
+    .priority-card ul{padding-left:20px;color:#526174;line-height:1.9}
+    .priority-status{margin-top:10px;color:var(--red);font-size:12px}
+    .checkout-rush{display:flex;align-items:start;gap:9px;padding:11px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px}
+    .checkout-rush input{margin-top:3px;accent-color:var(--red)}
+    .checkout-payment-note{padding:10px;border-radius:7px;background:#fff8ed;color:#6b542d;font-size:11px}
+    .checkout-methods{display:grid;gap:9px;margin:14px 0}
+    .checkout-method{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+    .checkout-method:focus-within{border-color:#c77d84;background:#fff8f8}
+    .checkout-method input{margin-top:3px;accent-color:var(--red)}
+    .checkout-method strong,.checkout-method small{display:block}
+    .checkout-method small{margin-top:3px;color:var(--muted);font-size:11px}
+    .upi-offer{display:inline-block;margin-left:5px;padding:3px 6px;border-radius:99px;background:#edf7ef;color:#226b45;font-size:10px;font-weight:750}
+    .checkout-summary{margin:12px 0;padding:10px;border-top:1px solid var(--line)}
+    .free-delivery-nudge{margin:12px 0;padding:12px;border:1px solid #dfe9df;border-radius:8px;background:#f5faf5}
+    .free-delivery-nudge p{margin:0 0 8px;color:#40534a;font-size:12px}
+    .free-delivery-progress{height:6px;overflow:hidden;border-radius:99px;background:#e2e8e2}
+    .free-delivery-progress span{display:block;height:100%;border-radius:inherit;background:#358055;transition:width .2s ease}
+    .free-delivery-nudge .secondary-button{margin-top:9px}
+    .checkout-summary .total-row{gap:12px}
+    .checkout-summary .total-row span:last-child{white-space:nowrap}
+    .checkout-payment-step[hidden]{display:none}
+    .checkout-payment-step .payment-method-details[hidden]{display:none}
+    .food-mark{display:inline-block;width:10px;height:10px;border:1px solid currentColor;border-radius:2px;margin-right:6px;vertical-align:1px;position:relative}
+    .food-mark:after{content:"";position:absolute;inset:2px;border-radius:50%;background:currentColor}
+    .veg-mark{color:#25804a}
+    .non-veg-mark{color:#b32432}
+    @media(max-width:760px){.settings-grid,.priority-layout,.payment-layout{grid-template-columns:1fr}.preference-card{align-items:flex-start}}
+    @media(max-width:440px){.preference-card{flex-direction:column}.veg-quick{font-size:11px}.catalog-controls{gap:7px;flex-direction:column;align-items:flex-end}}
+    .product-card{position:relative;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:white;min-width:0;box-shadow:0 2px 8px #18263808;transition:transform .18s ease,box-shadow .18s ease}
+    .product-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px #18263812}
+    .product-visual{height:132px;display:grid;place-items:center;background:var(--visual,#f6f2ef);font-size:60px}
+    .product-body{padding:11px}
+    .product-title{font-size:13px;font-weight:700;margin:0 0 3px}
+    .product-detail{height:17px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .product-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+    .price{font-weight:750;font-size:14px}
+    .add-button{min-width:58px;border:1px solid #d6a5a9;background:white;border-radius:5px;color:var(--red);padding:6px 12px;font-size:12px;font-weight:750}
+    .add-button:hover{background:#fff5f5}
+    .qty-control{display:flex;align-items:center;gap:9px;border:1px solid #e6c6c8;border-radius:5px;color:var(--red);padding:2px 5px}
+    .qty-control button{border:0;background:transparent;color:var(--red);font-size:16px;font-weight:700;padding:0 3px}
+    .delivery-tag{position:absolute;top:8px;left:8px;background:#fff;padding:4px 6px;border-radius:4px;font-size:10px;font-weight:700}
+    .basket{position:sticky;top:140px;border:1px solid var(--line);border-radius:11px;background:white;overflow:hidden;box-shadow:0 4px 16px #18263808}
+    .basket-head{padding:14px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+    .basket-head h3{margin:0;font-size:15px}
+    .basket-empty{padding:25px 16px;text-align:center;color:var(--muted)}
+    .basket-empty .empty-icon{font-size:38px;margin-bottom:7px}
+    .basket-empty strong{display:block;color:#444;margin-bottom:3px}
+    .basket-items{padding:3px 14px;max-height:290px;overflow:auto}
+    .basket-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px 0;border-bottom:1px solid #f0eeee}
+    .basket-item strong{display:block;font-size:12px}
+    .basket-item small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .basket-item-bottom{display:flex;align-items:center;gap:7px;margin-top:7px}
+    .basket-item-bottom button{border:1px solid var(--line);border-radius:4px;background:white;padding:2px 7px}
+    .basket-item-bottom span{font-size:11px}
+    .basket-totals{padding:12px 14px}
+    .total-row{display:flex;justify-content:space-between;margin:7px 0;color:#555;font-size:12px}
+    .total-row.grand{border-top:1px solid var(--line);padding-top:10px;margin-top:11px;color:var(--ink);font-weight:750;font-size:14px}
+    .checkout-button{width:100%;border:0;border-radius:6px;background:var(--red);color:white;padding:12px;font-weight:750}
+    .checkout-button:hover{background:var(--red-dark)}
+    .checkout-button:disabled{background:#bdb8b8;cursor:not-allowed}
+    .basket-hint{text-align:center;color:var(--muted);font-size:10px;margin:9px 0 1px}
+    .restaurant-list{display:grid;gap:12px}
+    .restaurant-card{border:1px solid var(--line);border-radius:11px;background:white;padding:17px;box-shadow:0 3px 12px #18263808}
+    .restaurant-top{display:flex;justify-content:space-between;align-items:start;gap:12px}
+    .restaurant-name{font-size:15px;font-weight:750}
+    .restaurant-meta{margin-top:4px;color:var(--muted);font-size:11px}
+    .partner-status{border:1px solid #e7d7bb;background:#fff9ed;color:#79571d;padding:5px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+    .restaurant-menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
+    .dish{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#faf9f8;border-radius:6px;padding:9px}
+    .dish strong{display:block;font-size:11px}
+    .dish small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+    .dish .add-button{min-width:0;padding:5px 8px}
+    .partner-disclosure{margin:0 0 13px;padding:11px 13px;border:1px solid #eadfcf;border-radius:6px;background:#fcf8f1;color:#63543d;font-size:12px;line-height:1.5}
+    .orders-list{display:grid;gap:12px}
+    .order-card{border:1px solid var(--line);border-radius:8px;padding:15px}
+    .order-card-head{display:flex;justify-content:space-between;gap:12px}
+    .order-card-head strong{font-size:13px}
+    .order-status{color:var(--green);font-size:11px;font-weight:700}
+    .order-card p{color:var(--muted);font-size:12px;margin:8px 0 0}
+    .basket-highlight{outline:2px solid #d5a5aa;outline-offset:3px;transition:outline-color .2s}
+    .empty-state{padding:38px 20px;text-align:center;border:1px dashed #d9d2d2;border-radius:9px;color:var(--muted)}
+    .empty-state strong{display:block;color:#444;margin-bottom:4px}
+    .section-screen[hidden]{display:none}
+    .drawer-backdrop{display:none}
+    .modal-backdrop{position:fixed;inset:0;z-index:10;background:#0008;display:grid;place-items:center;padding:18px}
+    .checkout-modal{width:min(500px,100%);background:white;border-radius:10px;padding:21px;box-shadow:0 18px 60px #0004}
+    .checkout-modal{max-height:90vh;overflow-y:auto}
+    .checkout-modal h2{margin:0 0 5px;font-size:20px}
+    .checkout-modal>p{margin:0 0 15px;color:var(--muted);font-size:12px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-field{display:grid;gap:5px;font-size:11px;font-weight:700}
+    .form-field.wide{grid-column:1/-1}
+    .form-field input,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:5px;padding:10px}
+    .form-field textarea{resize:vertical;min-height:65px}
+    .form-error{color:#a20d19;font-size:11px;min-height:17px;margin:8px 0}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px}
+    .secondary-button{border:1px solid var(--line);border-radius:5px;background:white;padding:10px 13px}
+    .site-footer{border-top:1px solid var(--line);padding:21px 0 27px;color:var(--muted);font-size:11px}
+    .footer-row{display:flex;justify-content:space-between;gap:15px}
+    .footer-credit{font-size:9px;opacity:.55;white-space:nowrap}
+    .toast{position:fixed;z-index:20;bottom:18px;left:50%;transform:translateX(-50%);background:#222;color:white;padding:11px 16px;border-radius:6px;box-shadow:0 5px 20px #0003;font-size:12px}
+    .brand-mark{overflow:hidden;border:1px solid #d84a58;box-shadow:inset 0 2px 2px #ffffff55,inset 0 -3px 4px #65101c55,0 5px 10px #9a152633}
+    .brand-logo{display:block;width:136px;height:68px;object-fit:contain}
+    .tracking-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:16px;align-items:start}
+    .tracking-map{width:100%;height:390px;border:0;border-radius:9px;background:#edf0f2}
+    .tracking-location{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .tracking-status{margin:0 0 12px;padding:12px;border:1px solid #eadfcf;border-radius:7px;background:#fcf8f1;color:#63543d;font-size:12px}
+    .tracking-update{min-height:20px;margin-top:10px;color:var(--muted);font-size:11px}
+    .tracking-share{margin-top:14px}
+    .tracking-link{display:block;overflow-wrap:anywhere;margin-top:8px;color:var(--red);font-size:11px}
+    .profile-button{width:38px;height:38px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:white;color:var(--navy);font-size:18px;padding:0}
+    .profile-button img{display:block;width:100%;height:100%;object-fit:cover}
+    .profile-map{width:100%;height:280px;margin-top:12px;border:0;border-radius:8px;background:#edf0f2}
+    .profile-location-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .profile-location-status{min-height:20px;margin-top:8px;color:var(--muted);font-size:11px}
+    .profile-summary{margin:0;padding:13px;border:1px solid var(--line);border-radius:8px;background:#fafbfc}
+    .profile-summary-content{display:flex;align-items:center;gap:12px}
+    .profile-summary-avatar,.avatar-preview{width:64px;height:64px;flex:0 0 64px;overflow:hidden;border:1px solid var(--line);border-radius:50%;object-fit:cover}
+    .profile-summary-avatar-fallback,.avatar-placeholder{display:grid;place-items:center;background:#f8eeee;color:var(--red);font-size:28px}
+    .profile-summary strong{display:block}
+    .profile-avatar-editor{display:flex;align-items:center;gap:13px;margin:12px 0 16px}
+    .profile-avatar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .profile-avatar-help{display:block;width:100%;color:var(--muted);font-size:11px}
+    .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .offer-preview{margin:0 0 20px;padding:17px 19px;border:1px solid #eadfe0;border-radius:10px;background:linear-gradient(110deg,#fff,#fff7f7)}
+    .offer-preview h2,.offer-preview h3{margin:0;font-size:16px;color:var(--navy)}
+    .offer-preview p{margin:5px 0 11px;color:var(--muted);font-size:12px}
+    .offer-preview ul{margin:9px 0 0;padding-left:19px;color:#526174;font-size:12px}
+    .offer-preview .secondary-button{margin-top:11px}
+    .offer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    @media(max-width:760px){.offer-grid{grid-template-columns:1fr}}
+    .emoji-3d{display:inline-block;transform:translateY(-2px) rotate(-5deg);filter:drop-shadow(0 6px 3px #1726382a);text-shadow:0 1px 0 #fff8,0 3px 0 #00000012}
+    .promo{position:relative;min-height:230px;display:grid;grid-template-columns:1fr 300px;align-items:center;overflow:hidden;padding:32px 38px;border-radius:11px;background:#231819;color:white;margin-bottom:22px}
+    .promo:before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,#231819 0%,#321b1f 53%,#661923 100%)}
+    .promo-copy{position:relative;z-index:2;max-width:560px}
+    .promo-kicker{color:#f3b3b8;text-transform:uppercase;font-size:10px;font-weight:750;letter-spacing:1.2px}
+    .promo h1{font-size:clamp(28px,4vw,43px);line-height:1.05;letter-spacing:-1.3px;margin:9px 0}
+    .promo p{max-width:480px;color:#e5dada;margin:0 0 16px;font-size:14px}
+    .promo-action{border:0;border-radius:5px;padding:10px 14px;background:white;color:#241719;font-weight:700}
+    .promo-art{position:absolute;right:5%;top:0;width:370px;height:100%;display:grid;place-items:center;z-index:1}
+    .courier-svg{width:100%;height:auto;overflow:visible}
+    .parcel-mascot{transform-box:fill-box;transform-origin:center;animation:parcel-float 3.2s ease-in-out infinite}
+    .parcel-glint{animation:glint 3.2s ease-in-out infinite}
+    @keyframes parcel-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+    @keyframes glint{0%,35%,100%{opacity:.35}50%,70%{opacity:.9}}
+    .promo-dots{position:absolute;left:38px;bottom:13px;z-index:3;display:flex;gap:6px}
+    .promo-dot{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#ffffff70}
+    .promo-dot[aria-current="true"]{width:21px;border-radius:5px;background:#fff}
+    .promo-arrows{position:absolute;right:16px;bottom:12px;z-index:3;display:flex;gap:7px}
+    .promo-arrow{width:30px;height:30px;border:1px solid #ffffff50;border-radius:50%;background:#190f1080;color:white}
+    .product-visual{position:relative;display:block;overflow:hidden;perspective:700px;padding:8px;background:radial-gradient(ellipse at 50% 95%,#1d29351a,transparent 58%),var(--visual,#f6f2ef)}
+    .product-photo{width:100%;height:100%;display:block;object-fit:cover;border-radius:8px;transform:perspective(700px) rotateY(-2deg) rotateX(1deg) scale(.97);box-shadow:0 7px 12px #11182725;transition:transform .35s ease,filter .35s ease}
+    .product-visual.package-visual .product-photo{object-fit:contain;box-shadow:none}
+    .product-visual:after{content:"";position:absolute;inset:8px;border-radius:8px;pointer-events:none;background:linear-gradient(145deg,#fff5 0%,transparent 34%,transparent 70%,#15223218 100%);box-shadow:inset 0 1px 0 #fff8,inset 0 -1px 0 #17263820}
+    .product-card:hover .product-photo{transform:perspective(700px) rotateY(0) rotateX(0) translateY(-2px) scale(.99);filter:saturate(1.04)}
+    .photo-fallback{display:none;position:absolute;inset:8px;place-items:center;border-radius:8px;font-size:64px;background:radial-gradient(circle at 35% 25%,#fff9,transparent 34%),linear-gradient(145deg,#fff2,var(--visual,#f6f2ef));text-shadow:0 2px 0 #fff9,0 5px 0 #00000014,0 9px 13px #00000028;filter:drop-shadow(0 5px 5px #0002)}
+    .product-visual.image-failed .photo-fallback{display:grid}
+    .product-visual.image-failed .product-photo{display:none}
+    .delivery-tag.local-tag{background:#f4eee0;color:#68531f}
+    .local-intro{margin:0 0 15px;padding:12px 14px;border:1px solid #eee6dc;border-radius:7px;background:#faf7f0;color:#65573e;font-size:12px}
+    .local-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .local-grid .product-visual{height:170px}
+    .local-grid .product-card{box-shadow:0 2px 8px #00000008}
+    .local-grid .product-title{font-size:14px}
+    .screen-title{margin:0 0 4px;font-size:22px;letter-spacing:-.4px}
+    .screen-subtitle{margin:0;color:var(--muted);font-size:12px}
+    .basket-highlight{outline:2px solid #d5a5aa;outline-offset:3px;transition:outline-color .2s}
+    .head-actions{display:flex;align-items:center;gap:8px}
+    .wallet-button{border:1px solid var(--line);border-radius:7px;background:white;padding:9px 11px;color:#444;font-weight:650;white-space:nowrap}
+    .wallet-button strong{display:block;color:var(--red);font-size:11px}
+    .category-list{display:grid;gap:9px;max-width:760px}
+    .category-tile{width:100%;display:flex;align-items:center;gap:14px;padding:13px 15px;border:1px solid var(--line);border-radius:9px;background:white;text-align:left}
+    .category-tile:hover{border-color:#d6a5a9;background:#fffafa}
+    .category-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border-radius:9px;background:#f8eeee;font-size:22px}
+    .category-tile strong,.category-tile small{display:block}
+    .category-tile strong{font-size:14px}
+    .category-tile small{margin-top:3px;color:var(--muted);font-size:11px}
+    .category-arrow{margin-left:auto;color:var(--red);font-size:25px}
+    .back-link{border:0;background:transparent;padding:0;color:var(--red);font-weight:700;margin:3px 0 8px}
+    .commercial-layout,.support-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;align-items:start}
+    .feature-card{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;box-shadow:0 3px 12px #18263808}
+    .feature-card .form-field{margin-bottom:13px}
+    .feature-card h3{margin:7px 0;font-size:16px}
+    .feature-card p{color:var(--muted);font-size:12px;line-height:1.55}
+    .feature-icon{font-size:28px}
+    .feature-card select,.feature-card input,.feature-card textarea{font:inherit;border:1px solid var(--line);border-radius:5px;padding:10px;background:white}
+    .shipment-info{min-height:100%}
+    .shipment-info .secondary-button{margin-top:8px}
+    .wallet-panel{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:13px;max-width:700px}
+    .wallet-panel .feature-icon{grid-row:span 2}
+    .wallet-label{display:block;color:var(--muted);font-size:11px}
+    .wallet-amount{display:block;font-size:28px}
+    .wallet-panel>p,.wallet-actions{grid-column:1/-1}
+    .wallet-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .wallet-add{border:1px solid #d6a5a9;border-radius:5px;background:#fff5f5;color:var(--red);padding:9px 12px;font-weight:700}
+    .payment-methods{max-width:700px;margin-top:14px}
+    .payment-chip{display:inline-block;margin:4px 6px 0 0;padding:6px 9px;border:1px solid var(--line);border-radius:99px;color:#666;font-size:11px}
+    .support-response{min-height:190px}
+    .support-response a{display:inline-block;margin-top:10px;border-radius:5px;background:var(--red);color:white;padding:10px 13px;text-decoration:none;font-weight:700}
+    .shipment-record{margin-top:12px}
+    .shipment-record strong{display:block}
+    .promo{min-height:270px;border-radius:15px;box-shadow:0 12px 30px #18263820}
+    .promo:before{background:linear-gradient(105deg,#172638 0%,#28384c 56%,#6e1d2b 100%)}
+    .promo[data-tone="farms"]:before{background:linear-gradient(105deg,#17332c 0%,#275248 55%,#7a4729 100%)}
+    .promo[data-tone="food"]:before{background:linear-gradient(105deg,#282137 0%,#48334c 55%,#a04436 100%)}
+    .promo[data-tone="daily"]:before{background:linear-gradient(105deg,#172d42 0%,#244b67 55%,#377874 100%)}
+    .promo[data-tone="care"]:before{background:linear-gradient(105deg,#292034 0%,#4b3546 55%,#893342 100%)}
+    .promo[data-tone="business"]:before{background:linear-gradient(105deg,#172638 0%,#30465c 55%,#774029 100%)}
+    .promo h1{max-width:620px}
+    .promo-art{filter:drop-shadow(0 10px 18px #090b102e)}
+    .promo-action{border-radius:7px;box-shadow:0 3px 8px #0002}
+    .promo-arrow{width:34px;height:34px}
+    .theme-settings{margin:14px 0}
+    .theme-settings>p{margin:5px 0 14px;color:var(--muted);font-size:12px}
+    .theme-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+    .theme-choice{display:grid;gap:9px;min-height:84px;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);text-align:left;transition:border-color .15s,box-shadow .15s,transform .15s}
+    .theme-choice:hover{transform:translateY(-1px);border-color:var(--red)}
+    .theme-choice[aria-pressed="true"]{border:2px solid var(--red);padding:11px;box-shadow:0 0 0 2px color-mix(in srgb,var(--red) 15%,transparent)}
+    .theme-choice:focus-visible{outline:3px solid color-mix(in srgb,var(--red) 40%,transparent);outline-offset:2px}
+    .theme-choice-copy{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:750}
+    .theme-check{color:var(--red);font-size:14px}
+    .theme-swatches{display:flex;gap:5px}
+    .theme-swatches i{width:18px;height:18px;border:1px solid #00000014;border-radius:50%}
+    .theme-choice[data-theme-choice="bright"] .theme-swatches i:nth-child(1){background:#b91527}
+    .theme-choice[data-theme-choice="bright"] .theme-swatches i:nth-child(2){background:#172638}
+    .theme-choice[data-theme-choice="bright"] .theme-swatches i:nth-child(3){background:#f7f8fa}
+    .theme-choice[data-theme-choice="dark"] .theme-swatches i:nth-child(1){background:#ff6475}
+    .theme-choice[data-theme-choice="dark"] .theme-swatches i:nth-child(2){background:#54b7ee}
+    .theme-choice[data-theme-choice="dark"] .theme-swatches i:nth-child(3){background:#101419}
+    .theme-choice[data-theme-choice="ocean"] .theme-swatches i:nth-child(1){background:#147bb5}
+    .theme-choice[data-theme-choice="ocean"] .theme-swatches i:nth-child(2){background:#40b98a}
+    .theme-choice[data-theme-choice="ocean"] .theme-swatches i:nth-child(3){background:#edf5f9}
+    .theme-choice[data-theme-choice="forest"] .theme-swatches i:nth-child(1){background:#348253}
+    .theme-choice[data-theme-choice="forest"] .theme-swatches i:nth-child(2){background:#dfad46}
+    .theme-choice[data-theme-choice="forest"] .theme-swatches i:nth-child(3){background:#edf5ed}
+    .theme-choice[data-theme-choice="sunset"] .theme-swatches i:nth-child(1){background:#c25423}
+    .theme-choice[data-theme-choice="sunset"] .theme-swatches i:nth-child(2){background:#d8475b}
+    .theme-choice[data-theme-choice="sunset"] .theme-swatches i:nth-child(3){background:#fff2e9}
+    html[data-theme="dark"]{color-scheme:dark;--ink:#edf2f7;--muted:#a9b5c2;--line:#35414c;--paper:#1c232b;--wash:#252e38;--red:#ff6475;--red-dark:#ea4e61;--green:#79d29a;--navy:#edf3fa;--page-background:#101419;--surface:#1c232b;--surface-soft:#171e26;--surface-hover:#2a2228;--soft-accent:#302129;--soft-accent-line:#63404a;--note-background:#2b2924;--note-ink:#f2dfb6;--note-line:#51483a}
+    html[data-theme="ocean"]{--ink:#183247;--muted:#597284;--line:#d5e4eb;--paper:#fff;--wash:#f1f7fa;--red:#147bb5;--red-dark:#0d6294;--green:#268263;--navy:#173f5b;--page-background:#edf5f9;--surface:#fff;--surface-soft:#f4f9fc;--surface-hover:#eaf5fb;--soft-accent:#e8f4fb;--soft-accent-line:#b8d9eb;--note-background:#eef7f7;--note-ink:#345d5a;--note-line:#cce5e1}
+    html[data-theme="forest"]{--ink:#25382d;--muted:#66796b;--line:#dce7dc;--paper:#fff;--wash:#f4f8f2;--red:#348253;--red-dark:#276b43;--green:#348253;--navy:#264b36;--page-background:#edf4ec;--surface:#fff;--surface-soft:#f6faf4;--surface-hover:#eff7ed;--soft-accent:#edf6eb;--soft-accent-line:#c8dfc7;--note-background:#f5f5e9;--note-ink:#585632;--note-line:#e3dfbf}
+    html[data-theme="sunset"]{--ink:#3b2b2a;--muted:#786463;--line:#ecdcd5;--paper:#fff;--wash:#fff7f2;--red:#c25423;--red-dark:#9e3e18;--green:#587b49;--navy:#51332d;--page-background:#fff2e9;--surface:#fffdfb;--surface-soft:#fff8f3;--surface-hover:#fff1e9;--soft-accent:#fff0e8;--soft-accent-line:#edcabb;--note-background:#fff7eb;--note-ink:#755331;--note-line:#f0dfc0}
+    html[data-theme] body{background:var(--page-background);color:var(--ink)}
+    html[data-theme] .site-header,html[data-theme] .quick-link,html[data-theme] .category,html[data-theme] .category-tile,html[data-theme] .product-card,html[data-theme] .basket,html[data-theme] .restaurant-card,html[data-theme] .feature-card,html[data-theme] .checkout-modal,html[data-theme] .secondary-button,html[data-theme] .wallet-button,html[data-theme] .browse-more,html[data-theme] .address-entry,html[data-theme] .profile-summary,html[data-theme] .theme-choice{background-color:var(--surface);color:var(--ink);border-color:var(--line)}
+    html[data-theme] .site-header,html[data-theme] .basket-head,html[data-theme] .basket-item,html[data-theme] .checkout-summary,html[data-theme] .site-footer{border-color:var(--line)}
+    html[data-theme] .search,html[data-theme] .profile-summary,html[data-theme] .profile-button,html[data-theme] .dish,html[data-theme] .basket-item-bottom button,html[data-theme] .browse-more-links button{background:var(--surface-soft);color:var(--ink);border-color:var(--line)}
+    html[data-theme] .search input,html[data-theme] .location-entry,html[data-theme] .feature-card input,html[data-theme] .feature-card textarea,html[data-theme] .feature-card select,html[data-theme] .form-field input,html[data-theme] .form-field textarea,html[data-theme] .pay-amount input{background:var(--surface-soft);color:var(--ink);border-color:var(--line)}
+    html[data-theme] .search input::placeholder,html[data-theme] input::placeholder,html[data-theme] textarea::placeholder{color:var(--muted)}
+    html[data-theme] .deliver-to strong,html[data-theme] .section-head h2,html[data-theme] .shelf-heading h3,html[data-theme] .browse-more h3,html[data-theme] .feature-card h3,html[data-theme] .basket-head h3,html[data-theme] .basket-empty strong,html[data-theme] .empty-state strong,html[data-theme] .upi-id,html[data-theme] .offer-preview h2,html[data-theme] .offer-preview h3{color:var(--navy)}
+    html[data-theme] .section-head p,html[data-theme] .feature-card p,html[data-theme] .product-detail,html[data-theme] .basket-item small,html[data-theme] .total-row,html[data-theme] .restaurant-meta,html[data-theme] .order-card p,html[data-theme] .settings-note,html[data-theme] .payment-caveat,html[data-theme] .profile-avatar-help,html[data-theme] .offer-preview p,html[data-theme] .offer-preview ul,html[data-theme] .site-footer{color:var(--muted)}
+    html[data-theme] .nav-button{color:var(--muted)}
+    html[data-theme] .nav-button.active,html[data-theme] .category-arrow,html[data-theme] .back-link{color:var(--red)}
+    html[data-theme] .service-note,html[data-theme] .partner-disclosure,html[data-theme] .tracking-status,html[data-theme] .checkout-payment-note,html[data-theme] .local-intro{background:var(--note-background);color:var(--note-ink);border-color:var(--note-line)}
+    html[data-theme] .service-note strong{color:var(--navy)}
+    html[data-theme] .quick-icon,html[data-theme] .category-icon,html[data-theme] .shelf-more span{background:var(--soft-accent);color:var(--red)}
+    html[data-theme] .quick-link:hover,html[data-theme] .category-tile:hover,html[data-theme] .full-catalog-tab,html[data-theme] .wallet-add,html[data-theme] .add-button,html[data-theme] .qty-control{background:var(--soft-accent);color:var(--red);border-color:var(--soft-accent-line)}
+    html[data-theme] .full-catalog-tab:hover,html[data-theme] .add-button:hover,html[data-theme] .category.active,html[data-theme] .category:hover,html[data-theme] .checkout-method:focus-within{background:var(--surface-hover);border-color:var(--red);color:var(--red)}
+    html[data-theme] .checkout-method{border-color:var(--line)}
+    html[data-theme] .profile-button{background:var(--surface);color:var(--navy);border-color:var(--line)}
+    html[data-theme] .profile-location-status,html[data-theme] .tracking-update{color:var(--muted)}
+    html[data-theme] .offer-preview{background:linear-gradient(110deg,var(--surface),var(--soft-accent));border-color:var(--soft-accent-line)}
+    html[data-theme] .free-delivery-nudge{background:var(--surface-soft);border-color:var(--line)}
+    html[data-theme] .free-delivery-nudge p{color:var(--muted)}
+    html[data-theme] .payment-chip{color:var(--muted);border-color:var(--line)}
+    html[data-theme] .assistant-profile{background:linear-gradient(120deg,var(--surface-soft),var(--surface))}
+    html[data-theme] .assistant-badge{background:var(--surface);color:var(--muted);border-color:var(--line)}
+    html[data-theme] .profile-summary-avatar-fallback,html[data-theme] .avatar-placeholder{background:var(--soft-accent);color:var(--red)}
+    html[data-theme="dark"] .profile-map,html[data-theme="dark"] .tracking-map{filter:brightness(.82) saturate(.85)}
+    @media(max-width:760px){.theme-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .assistant-panel{padding:0;overflow:hidden}
+    .assistant-profile{display:flex;align-items:center;gap:15px;padding:18px;background:linear-gradient(120deg,#f3f6f9,#fff)}
+    .assistant-portrait{width:90px;height:90px;flex:0 0 90px;border-radius:50%;overflow:hidden;border:4px solid white;box-shadow:0 3px 12px #18263820;background:#e8eef2}
+    .assistant-portrait svg{display:block;width:100%;height:100%}
+    .assistant-role{margin-top:4px;color:var(--muted);font-size:11px}
+    .assistant-presence{display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:#306746;font-size:11px;font-weight:700}
+    .assistant-presence:before{content:"";width:7px;height:7px;border-radius:50%;background:#35965b}
+    .assistant-note{margin:0 18px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .assistant-response{padding:4px 18px 18px}
+    .assistant-response>p{margin-top:5px}
+    .assistant-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:99px;background:white;color:#627181;font-size:10px}
+    .promo-dots{bottom:15px}
+    .quick-icon,.category-icon,.empty-icon,.feature-icon{filter:drop-shadow(0 3px 2px #17263824)}
+    .dish strong{ text-shadow:0 1px 0 #fff,0 2px 2px #17263818}
+    .assistant-portrait{transform:perspective(400px) rotateY(-5deg);box-shadow:0 8px 18px #18263820,inset 0 2px 3px #fff}
+    .courier-svg{overflow:visible}
+    .parcel-mascot-shadow{filter:blur(8px)}
+    @media(max-width:1000px){.head-main{grid-template-columns:190px 1fr minmax(200px,1fr) auto;gap:14px}}
+    @media(max-width:760px){.head-main{grid-template-columns:1fr auto}.head-actions{grid-column:2;grid-row:1}.head-actions .cart-button{padding:9px 10px}.wallet-button{padding:7px 9px}.main-nav{gap:20px}.commercial-layout,.support-layout{grid-template-columns:1fr}}
+    @media(max-width:440px){.head-actions{gap:5px}.head-actions .cart-button{font-size:11px}.wallet-button{font-size:11px}.wallet-actions{display:grid;grid-template-columns:1fr 1fr}.wallet-actions .secondary-button{grid-column:1/-1}}
+    @media(max-width:760px){.promo{min-height:220px;grid-template-columns:1fr;padding:26px 23px}.promo-art{right:-55px;width:260px;opacity:.65}.promo-copy{max-width:400px}.promo-dots{left:23px}.local-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:440px){.promo{min-height:200px;padding:22px 18px}.promo h1{max-width:260px;font-size:30px}.promo p{max-width:235px;font-size:12px}.promo-art{right:-91px;width:230px;opacity:.48}.promo-dots{left:18px}.local-grid{gap:9px}.local-grid .product-visual{height:125px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+    @media(max-width:1000px){.head-main{grid-template-columns:190px 1fr minmax(200px,1fr) auto;gap:14px}.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.content-layout{grid-template-columns:minmax(0,1fr) 270px}.restaurant-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.wrap{width:min(100% - 28px,600px)}.head-main{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:11px 0}.brand{grid-column:1}.deliver-to{grid-column:1;grid-row:2}.location-entry{width:min(160px,35vw)}.head-actions{gap:5px}.profile-button{width:34px;height:34px}.wallet-button{padding:7px 6px}.head-actions .cart-button{padding:8px 8px;font-size:10px}.search{grid-column:1/-1;grid-row:3}.cart-button{grid-column:2;grid-row:1}.main-nav{gap:20px;height:42px;overflow-x:auto}.hero{min-height:210px;padding:26px 23px}.hero:after{right:-85px}.hero-stamp{right:7%;font-size:68px;opacity:.8}.quick-links{grid-template-columns:repeat(2,1fr)}.content-layout{grid-template-columns:1fr}.basket{position:static}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.product-visual{height:122px}.restaurant-menu{grid-template-columns:1fr 1fr}}
+    @media(max-width:760px){.tracking-layout{grid-template-columns:1fr}.tracking-map{height:310px}}
+    @media(max-width:440px){.hero{min-height:190px}.hero p{max-width:250px}.hero-stamp{right:2%;font-size:55px;top:26px}.quick-link{padding:11px 9px;gap:8px}.quick-icon{width:35px;height:35px;font-size:18px}.quick-link small{font-size:10px}.product-grid{gap:9px}.product-visual{height:105px;font-size:49px}.product-body{padding:9px}.restaurant-menu{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-field.wide{grid-column:auto}.footer-row{flex-direction:column}}
+    @media(max-width:760px){
+      .site-header .wrap{width:calc(100% - 24px)}
+      .head-main{column-gap:8px}
+      .brand-logo{width:104px;height:52px}
+      .head-actions{gap:4px}
+      .wallet-button{display:grid;place-items:center;gap:0;min-width:44px;min-height:44px;padding:4px}
+      .wallet-button strong{line-height:1.1}
+      .cart-button{min-height:44px;padding:7px 9px!important;font-size:11px!important}
+      .location-entry{max-width:calc(100vw - 48px)}
+      .deliver-to{white-space:nowrap}
+      .main-nav{height:46px;gap:8px;padding:0 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+      .main-nav::-webkit-scrollbar{display:none}
+      .nav-button{flex:0 0 auto;min-height:44px;padding:0 8px;white-space:nowrap}
+      main{padding-top:20px}
+      .section-head{flex-wrap:wrap;align-items:flex-start}
+      .section-head>div:last-child{max-width:100%}
+      .section-head .browse-more-links{width:100%;justify-content:flex-start;align-items:center}
+      .browse-more{flex-direction:column;align-items:flex-start;padding:15px}
+      .browse-more-links{max-width:100%}
+      .browse-more-links button,.full-catalog-tab{max-width:100%;white-space:normal}
+      .feature-card,.order-card,.restaurant-card{min-width:0}
+      .feature-card input,.feature-card select,.feature-card textarea,.form-field input,.form-field select,.form-field textarea{font-size:16px}
+      .profile-location-actions>*{min-height:44px}
+      .payment-actions{flex-wrap:wrap}
+      .payment-actions>*{min-height:44px}
+      .theme-choice{min-height:76px}
+    }
+    @media(max-width:440px){
+      .head-actions{gap:4px}
+      .wallet-button>span{display:none}
+      .wallet-button{width:40px;min-width:40px}
+      .cart-label-desktop{display:none}
+      .cart-label-mobile{display:inline}
+      .head-actions .cart-button{padding:7px 7px!important}
+      .brand-logo{width:96px;height:48px}
+      .service-note{align-items:flex-start;padding:10px 11px}
+      .section-head{align-items:flex-start}
+      .section-head h2{font-size:20px}
+      .assistant-profile{gap:12px;padding:14px}
+      .assistant-portrait{width:76px;height:76px;flex-basis:76px}
+      .checkout-modal{width:100%;padding:16px}
+      .modal-backdrop{padding:10px}
+    }
+    @media(max-width:360px){
+      .site-header .wrap{width:calc(100% - 20px)}
+      .head-main{column-gap:5px}
+      .brand-logo{width:82px;height:42px}
+      .head-actions{gap:3px}
+      .profile-button{width:32px;height:36px}
+      .wallet-button{width:36px;min-width:36px;min-height:40px}
+      .cart-button{min-height:40px;padding:6px!important}
+      .cart-count{min-width:18px;height:18px;margin-left:4px}
+      .main-nav{gap:3px}
+      .nav-button{padding:0 7px;font-size:12px}
+      .wrap{width:calc(100% - 24px)}
+      .promo{padding:20px 15px}
+      .promo-copy{max-width:100%}
+      .promo h1{max-width:230px;font-size:27px}
+      .promo p{max-width:205px}
+      .theme-choices{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="head-main">
+        <a class="brand" href="#shop" aria-label="InstaDROP home"><img class="brand-logo" src="instadrop-logo.jpeg" alt="InstaDROP"></a>
+        <label class="deliver-to">DELIVERING TO <strong><input class="location-entry" id="delivery-location" aria-label="Delivery area" value="Shivpuri, MP"></strong></label>
+        <label class="search"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Search groceries, snacks and more" autocomplete="off"></label>
+        <div class="head-actions"><button class="profile-button" type="button" data-screen="account" aria-label="Your account" title="Your account"><img id="profile-button-avatar" alt="" hidden><span id="profile-button-fallback" aria-hidden="true">♙</span></button><button class="wallet-button" type="button" data-screen="wallet"><span>Wallet</span><strong id="wallet-balance">₹0</strong></button><button class="cart-button" id="cart-button" type="button"><span class="cart-label-desktop">Your basket</span><span class="cart-label-mobile">Basket</span><span class="cart-count" id="cart-count">0</span></button></div>
+      </div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-button active" type="button" data-screen="shop">Shop</button>
+        <button class="nav-button" type="button" data-screen="food">Food from hotels</button>
+        <button class="nav-button" type="button" data-screen="local">Local finds</button>
+        <button class="nav-button" type="button" data-screen="commercial">Commercial delivery</button>
+        <button class="nav-button" type="button" data-screen="delivery-settings">Delivery settings</button>
+        <button class="nav-button" type="button" data-screen="priority">Priority pass</button>
+        <button class="nav-button" type="button" data-screen="support">Customer care</button>
+        <button class="nav-button" type="button" data-screen="orders">Your orders</button>
+        <button class="nav-button" type="button" data-screen="tracking">Track delivery</button>
+        <button class="nav-button" type="button" data-screen="account">My account</button>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="service-note"><span>●</span><span><strong>Local demo for Shivpuri.</strong> UPI opens a direct transfer outside this site; payments cannot be verified and no orders are dispatched.</span></div>
+    <section class="section-screen" id="screen-shop">
+      <section class="promo" data-tone="city" aria-label="InstaDROP promotions">
+        <div class="promo-copy" aria-live="polite">
+          <div class="promo-kicker" id="promo-kicker">Made for Shivpuri</div>
+          <h1 id="promo-title">Your fridge called.<br>It wants backup.</h1>
+          <p id="promo-copy">Everyday essentials from nearby shops. Your tomatoes can stop feeling lonely.</p>
+          <button class="promo-action" type="button" data-scroll="products" id="promo-action">Browse groceries</button>
+        </div>
+        <div class="promo-art" aria-hidden="true">
+          <svg class="courier-svg" viewBox="0 0 390 250" role="img" aria-label="Floating 3D parcel mascot">
+            <defs>
+              <linearGradient id="box-front" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8c56d"/><stop offset="1" stop-color="#d88735"/></linearGradient>
+              <linearGradient id="box-side" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c87331"/><stop offset="1" stop-color="#934524"/></linearGradient>
+              <linearGradient id="box-top" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#ffe4a4"/><stop offset="1" stop-color="#eaa64f"/></linearGradient>
+              <linearGradient id="tape" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff0bd"/><stop offset=".5" stop-color="#fff9df"/><stop offset="1" stop-color="#e8bd6c"/></linearGradient>
+              <radialGradient id="halo"><stop stop-color="#ffffff" stop-opacity=".2"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+            </defs>
+            <ellipse class="parcel-mascot-shadow" cx="202" cy="211" rx="96" ry="13" fill="#10151d" opacity=".42"/>
+            <circle cx="204" cy="125" r="132" fill="url(#halo)"/>
+            <path d="M76 102h35m-19-12 19 12-19 12M306 83h33m-18-11 18 11-18 11" fill="none" stroke="#ffffffb5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <g class="parcel-mascot">
+              <path d="m137 77 63-31 70 29-65 35z" fill="url(#box-top)" stroke="#ffe8b5" stroke-width="2"/>
+              <path d="m137 77 68 33v91l-68-36z" fill="url(#box-front)" stroke="#e9b46b" stroke-width="2"/>
+              <path d="m205 110 65-35v91l-65 35z" fill="url(#box-side)" stroke="#d58a48" stroke-width="2"/>
+              <path d="m179 57 29-14 42 18-30 15z" fill="url(#tape)" opacity=".96"/>
+              <path d="m211 108 18-9v98l-18 10z" fill="url(#tape)" opacity=".94"/>
+              <path d="m137 77 68 33 65-35" fill="none" stroke="#fff2d0" stroke-width="2" opacity=".8"/>
+              <path d="M164 125q18 9 35 1v25q-17 8-35-1z" fill="#fff9e9" opacity=".9"/>
+              <path d="M172 133h17m-17 7h12" stroke="#bd7738" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="234" cy="129" r="3.3" fill="#ffe0a2"/><circle cx="249" cy="121" r="3.3" fill="#ffe0a2"/>
+              <path d="M232 144q9 7 19-2" fill="none" stroke="#ffe0a2" stroke-width="3" stroke-linecap="round"/>
+              <path d="m123 65-8-11m158 2 9-12m18 88 14 2" stroke="#fff4dd" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+            </g>
+            <path class="parcel-glint" d="m293 117 4 10 10 4-10 4-4 10-4-10-10-4 10-4zM104 146l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff6d8"/>
+          </svg>
+        </div>
+        <div class="promo-dots" id="promo-dots" aria-label="Promotion slides"></div>
+        <div class="promo-arrows"><button type="button" class="promo-arrow" id="promo-prev" aria-label="Previous promotion">‹</button><button type="button" class="promo-arrow" id="promo-next" aria-label="Next promotion">›</button></div>
+      </section>
+      <div class="offer-preview" id="shop-offers" aria-live="polite"></div>
+      <div id="category-picker">
+        <div class="section-head"><div><h2>Shop by aisle</h2><p>Each shelf keeps similar things together. Swipe across to see more.</p></div><div class="browse-more-links"><label class="veg-quick"><input type="checkbox" data-veg-mode> 🌿 Veg mode</label><button class="full-catalog-tab" type="button" data-open-catalog="All">＋ Full catalogue</button></div></div>
+        <div class="shelf-list" id="shelf-list" aria-label="Products grouped by category"></div>
+        <div class="browse-more"><div><h3>Still browsing? We have more aisles.</h3><p>Explore sample hotel menus or local makers from Shivpuri.</p></div><div class="browse-more-links"><button type="button" data-screen="food">Food from hotels</button><button type="button" data-screen="local">Local finds</button></div></div>
+        <div class="browse-more"><div><h3>Want to see everything at once?</h3><p>Open the complete catalogue and filter by aisle.</p></div><button class="full-catalog-tab" type="button" data-open-catalog="All">＋ Browse full catalogue</button></div>
+      </div>
+      <div id="shopping-results" hidden>
+        <button class="back-link" type="button" id="back-to-categories">‹ Back to shop aisles</button>
+        <div class="section-head" id="products"><div><h2 id="selected-category-title">Shop the essentials</h2><p>A small sample catalogue for the Shivpuri demo.</p></div><div class="catalog-controls"><label class="veg-quick"><input type="checkbox" data-veg-mode> 🌿 Veg mode</label><span class="muted" id="product-count"></span></div></div>
+      <div class="category-row" id="category-row" aria-label="Filter products"></div>
+      <div class="content-layout">
+        <div class="product-grid" id="product-grid"></div>
+        <aside class="basket" id="basket" aria-label="Your basket"></aside>
+      </div>
+      </div>
+    </section>
+    <section class="section-screen" id="screen-food" hidden>
+      <div class="section-head"><div><h2>Food from local hotels</h2><p>Explore sample menus while we prepare restaurant partnerships in Shivpuri.</p></div></div>
+      <div class="partner-disclosure"><strong>Partner preview.</strong> These hotel names and menus are sample listings for the website demo, not confirmed businesses. Ordering will reach a restaurant only after a real partner integration is set up. Test orders here stay in your browser.</div>
+      <div class="content-layout"><div class="restaurant-list" id="restaurant-list"></div><aside class="basket" id="basket-food" aria-label="Your basket"></aside></div>
+    </section>
+    <section class="section-screen" id="screen-local" hidden>
+      <div class="section-head"><div><h2 class="screen-title">Local finds</h2><p class="screen-subtitle">A space for Shivpuri growers, makers and neighbourhood shops.</p></div></div>
+      <div class="local-intro"><strong>Community shop preview.</strong> These example listings show how local producers could join the app. They are not verified sellers, and test orders are not sent to anyone.</div>
+      <div class="content-layout"><div class="local-grid" id="local-grid"></div><aside class="basket" id="basket-local" aria-label="Your basket"></aside></div>
+    </section>
+    <section class="section-screen" id="screen-orders" hidden>
+      <div class="section-head"><div><h2>Your orders</h2><p>Orders placed in this demo are saved on this device.</p></div></div>
+      <div class="orders-list" id="orders-list"></div>
+    </section>
+    <section class="section-screen" id="screen-tracking" hidden>
+      <div class="section-head"><div><h2>Delivery tracking</h2><p>Google Maps view for Shivpuri and a privacy-first location-sharing preview.</p></div></div>
+      <div class="tracking-status"><strong>Tracking is not connected to a live delivery.</strong> Checkout requests stay in this browser and are unpaid; no courier has been assigned. The map shows Shivpuri, not a courier's position.</div>
+      <div class="tracking-layout">
+        <div class="feature-card"><h3>Shivpuri on Google Maps</h3><iframe class="tracking-map" id="tracking-map" title="Google Maps view of Shivpuri, Madhya Pradesh" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><div class="tracking-location"><a class="secondary-button" id="open-tracking-map" href="https://www.google.com/maps/search/?api=1&amp;query=Shivpuri%2C%20Madhya%20Pradesh" target="_blank" rel="noopener noreferrer">Open Google Maps</a></div></div>
+        <aside class="feature-card tracking-share"><h3>Share a courier location update</h3><p>For a courier using this device: allow location access to create and share a one-time map link. The customer will not receive automatic updates; share a new link when the location changes.</p><button class="checkout-button" type="button" id="share-courier-location">Get this device's location &amp; share</button><div class="tracking-update" id="tracking-update" role="status" aria-live="polite">Location has not been requested.</div><a class="tracking-link" id="tracking-location-link" hidden target="_blank" rel="noopener noreferrer"></a><p class="settings-note">Location is requested only after you press the button. This prototype does not store or upload GPS data.</p></aside>
+      </div>
+      <div class="feature-card" style="margin-top:16px"><h3>Order status</h3><p id="tracking-order-status">No live order status is available. Demo requests are not dispatched.</p></div>
+    </section>
+    <section class="section-screen" id="screen-account" hidden>
+      <div class="section-head"><div><h2>My account</h2><p>Keep your delivery details and occupation-based suggestions on this device.</p></div></div>
+      <div class="partner-disclosure"><strong>Local demo profile, not a sign-in account.</strong> Your name, address, occupation, and optional coordinates are saved in this browser only. There is no password, server account, or cross-device sync. Location is requested only when you tap the location button. Loading the map preview sends the displayed address or coordinates to Google Maps.</div>
+      <div class="offer-grid">
+        <form class="feature-card" id="profile-form">
+          <h3>Your details</h3>
+          <div class="profile-avatar-editor">
+            <img class="avatar-preview" id="profile-photo-preview" alt="Profile photo preview" hidden>
+            <span class="avatar-preview avatar-placeholder" id="profile-photo-placeholder" aria-hidden="true">♙</span>
+            <div class="profile-avatar-actions">
+              <label class="secondary-button" for="profile-photo-input">Choose a photo</label>
+              <input class="visually-hidden" id="profile-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
+              <button class="secondary-button" type="button" id="profile-photo-clear" hidden>Remove photo</button>
+              <small class="profile-avatar-help">Optional · JPG, PNG or WebP · up to 5 MB</small>
+            </div>
+          </div>
+          <label class="form-field">Full name<input name="name" maxlength="80" autocomplete="name" required placeholder="Your name"></label>
+          <label class="form-field">Delivery address<textarea name="address" rows="3" maxlength="300" autocomplete="street-address" required placeholder="House, street, area, Shivpuri"></textarea></label>
+          <label class="form-field">Occupation
+            <select name="occupation" required>
+              <option value="">Choose an occupation</option>
+              <option value="student">Student</option>
+              <option value="salaried">Salaried professional</option>
+              <option value="business">Business owner / shopkeeper</option>
+              <option value="farmer">Farmer / agricultural worker</option>
+              <option value="homemaker">Homemaker</option>
+              <option value="healthcare">Healthcare worker</option>
+              <option value="education">Teacher / education worker</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <div class="profile-location-actions"><button class="secondary-button" type="button" id="profile-use-location">Use my current location</button><a class="secondary-button" id="profile-map-link" href="https://www.google.com/maps/search/?api=1&amp;query=Shivpuri%2C%20Madhya%20Pradesh" target="_blank" rel="noopener noreferrer">Open address in Google Maps</a></div>
+          <div class="profile-location-status" id="profile-location-status" role="status" aria-live="polite">Enter a delivery address, or optionally use this device's location.</div>
+          <iframe class="profile-map" id="profile-map" title="Google Maps preview of your delivery address" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <button class="checkout-button" type="submit" style="margin-top:14px">Save my profile</button>
+        </form>
+        <div>
+          <div class="feature-card"><h3>Profile summary</h3><div id="profile-summary" class="profile-summary">Add your details to create a local profile.</div></div>
+          <div class="offer-preview" id="account-offers" aria-live="polite" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </section>
+    <section class="section-screen" id="screen-commercial" hidden>
+      <div class="section-head"><div><h2>Commercial shipments</h2><p>A demo request flow for shops and small businesses.</p></div></div>
+      <div class="partner-disclosure"><strong>Service preview only.</strong> This quote is an estimate for demonstration. No courier is booked, no parcel is tracked, and submitting stays in this browser.</div>
+      <div class="commercial-layout">
+        <form class="feature-card" id="shipment-form">
+          <h3>Where should it go?</h3>
+          <label class="form-field">Pickup from<input name="origin" maxlength="180" required autocomplete="street-address" placeholder="Pickup address, area or landmark"></label>
+          <label class="form-field">Deliver to<input name="destination" maxlength="180" required autocomplete="street-address" placeholder="Destination address, area or landmark"></label>
+          <label class="form-field">Shipment type<select name="shipment" required><option value="document">Documents</option><option value="small">Small parcel</option><option value="business">Business cartons</option></select></label>
+          <label class="form-field">Approximate weight (kg)<input name="weight" type="number" min="0.1" max="100" step="0.1" value="1" required></label>
+          <label class="form-field">Approximate route distance (km)<input name="distance" type="number" min="1" max="500" step="1" value="5" required><small>Check the route in Google Maps and enter its approximate distance.</small></label>
+          <button class="checkout-button" type="submit">Get route &amp; demo estimate</button>
+          <div class="form-error" id="shipment-result" aria-live="polite"></div>
+        </form>
+        <aside class="feature-card shipment-info"><span class="feature-icon">📦</span><h3>For local businesses</h3><p>Add both addresses to see the trip from pickup to destination. Route distance and prices are estimates only; this preview does not arrange a driver or book a courier.</p><button class="secondary-button" type="button" data-screen="support">Ask customer care</button></aside>
+      </div>
+      <div class="orders-list" id="shipment-list"></div>
+    </section>
+    <section class="section-screen" id="screen-wallet" hidden>
+      <div class="section-head"><div><h2>Your wallet &amp; payments</h2><p>Demo-only wallet controls for trying the checkout flow.</p></div></div>
+      <div class="partner-disclosure"><strong>UPI payment goes directly to the UPI ID shown below.</strong> This prototype cannot verify a transfer or create a live order. Pay only if you recognize and trust this recipient; do not enter card numbers, UPI PINs, or banking credentials here.</div>
+      <div class="wallet-panel feature-card"><span class="feature-icon">👛</span><div><span class="wallet-label">Demo balance</span><strong class="wallet-amount" id="wallet-amount">₹0</strong></div><p>Practice adding demo credits. This does not connect to a bank or payment provider.</p><div class="wallet-actions"><button class="wallet-add" type="button" data-wallet-add="100">Add ₹100 demo</button><button class="wallet-add" type="button" data-wallet-add="500">Add ₹500 demo</button><button class="secondary-button" type="button" id="wallet-reset">Reset demo balance</button></div></div>
+      <div class="payment-layout"><div class="feature-card qr-card"><h3>Pay by UPI</h3><p>Scan with your UPI app, or open a payment app from this device. Verify the payee and amount in your app before approving.</p><img src="upi-payment-qr.jpeg" class="upi-qr" alt="UPI payment QR code supplied by the account owner"><strong class="upi-id" id="upi-id">8640058700@axl</strong><div class="payment-actions"><button class="secondary-button" type="button" id="copy-upi">Copy UPI ID</button><button class="checkout-button" type="button" id="open-upi-wallet">Open UPI app</button></div><label class="form-field pay-amount">Optional payment amount (₹)<input id="upi-amount" type="number" min="1" max="100000" step="1" value="99"></label><p class="payment-caveat">The QR image is provided by you. Check the recipient shown in your UPI app before sending. No transaction status is received by this site.</p></div><div class="feature-card payment-methods"><h3>Payment options</h3><p>UPI intent and QR are available as a direct payment handoff. Demo wallet credits are not money. Cash on delivery and card payments are not connected in this prototype.</p><span class="payment-chip">UPI · direct app handoff</span><span class="payment-chip">Demo wallet · no cash value</span></div></div>
+    </section>
+    <section class="section-screen" id="screen-delivery-settings" hidden>
+      <div class="section-head"><div><h2>Delivery settings</h2><p>Save addresses and set your shopping preferences on this device.</p></div></div>
+      <div class="settings-grid"><form class="feature-card" id="address-form"><h3>Add a delivery location</h3><label class="form-field">Address label<input name="label" maxlength="30" required placeholder="Home, work, or other"></label><label class="form-field">Full delivery address<textarea name="address" rows="3" maxlength="300" required placeholder="House, street, area, Shivpuri"></textarea></label><button class="checkout-button" type="submit">Save location</button><p class="settings-note">Addresses stay in this browser only. Don’t save sensitive access codes here.</p></form><div class="feature-card"><h3>Saved locations</h3><div id="address-list" class="address-list"></div></div></div>
+      <section class="feature-card theme-settings" aria-labelledby="theme-heading">
+        <h3 id="theme-heading">Choose your look</h3>
+        <p>Pick a bright or dark mode, or try a color palette. Your choice is saved on this device.</p>
+        <div class="theme-choices" role="group" aria-label="Color themes">
+          <button class="theme-choice" type="button" data-theme-choice="bright" aria-pressed="false"><span class="theme-choice-copy">Bright <span class="theme-check" aria-hidden="true"></span></span><span class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="theme-choice" type="button" data-theme-choice="dark" aria-pressed="false"><span class="theme-choice-copy">Dark <span class="theme-check" aria-hidden="true"></span></span><span class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="theme-choice" type="button" data-theme-choice="ocean" aria-pressed="false"><span class="theme-choice-copy">Ocean <span class="theme-check" aria-hidden="true"></span></span><span class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="theme-choice" type="button" data-theme-choice="forest" aria-pressed="false"><span class="theme-choice-copy">Forest <span class="theme-check" aria-hidden="true"></span></span><span class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="theme-choice" type="button" data-theme-choice="sunset" aria-pressed="false"><span class="theme-choice-copy">Sunset <span class="theme-check" aria-hidden="true"></span></span><span class="theme-swatches" aria-hidden="true"><i></i><i></i><i></i></span></button>
+        </div>
+      </section>
+      <div class="feature-card preference-card"><div><h3>Veg mode</h3><p>Hide items marked non-vegetarian while you browse groceries and food menus.</p></div><label class="switch-control"><input type="checkbox" data-veg-mode><span class="switch-track"></span><strong class="veg-mode-label">Off</strong></label></div>
+      <div class="feature-card preference-card"><div><h3>Faster delivery</h3><p>Add priority handling for ₹30 per basket. This is a demo option; no courier is dispatched.</p></div><button class="secondary-button" type="button" data-screen="shop">Choose in basket</button></div>
+    </section>
+    <section class="section-screen" id="screen-priority" hidden>
+      <div class="section-head"><div><h2>Priority Pass</h2><p>A subscription concept for customers who want first dibs.</p></div></div>
+      <div class="partner-disclosure"><strong>Membership is a prototype.</strong> Priority handling and faster delivery are not currently provided. If you pay by UPI, money goes directly to the supplied UPI ID; this site cannot verify or refund it. Do not pay for this preview as a real subscription.</div>
+      <div class="priority-layout"><div class="feature-card priority-card" aria-label="InstaDROP Priority Pass subscription preview"><div class="pass-topline"><span class="pass-label">INSTADROP · MEMBERS CLUB</span><span class="pass-seal" aria-hidden="true">✦</span></div><span class="assistant-badge">MONTHLY MEMBERSHIP CONCEPT</span><h3>Priority Pass</h3><p class="priority-price">₹99 <small>/ month · preview price</small></p><ul class="pass-benefits"><li>First-priority order queue (planned)</li><li>Priority support (planned)</li><li>Member-only delivery offers (planned)</li></ul><button class="checkout-button" type="button" id="priority-subscribe">Preview subscription</button><div class="priority-status" id="priority-status" aria-live="polite"></div><p class="pass-note">This illustrated pass is a subscription concept only. Payment does not activate membership or delivery benefits.</p></div><div class="feature-card"><h3>What Priority Pass would include</h3><p>In a live service, a verified subscription could move eligible orders earlier in the dispatch queue. Availability, delivery windows, service area, and terms would need to be confirmed before launch.</p><button class="secondary-button" type="button" data-screen="wallet">View UPI payment details</button></div></div>
+    </section>
+    <section class="section-screen" id="screen-support" hidden>
+      <div class="section-head"><div><h2>Customer care</h2><p>Tell us what went wrong; the demo assistant will help prepare a clear message.</p></div></div>
+      <div class="partner-disclosure"><strong>Support assistant preview.</strong> This is a guided demo, not a connected AI service. Your message is not uploaded or sent automatically; you can review an email draft in your own mail app.</div>
+      <div class="support-layout">
+        <form class="feature-card" id="support-form">
+          <label class="form-field">What can we help with?
+            <select name="topic" required><option value="Order question">Order question</option><option value="Product or catalogue">Product or catalogue</option><option value="Delivery area">Delivery area</option><option value="Wallet or payment">Wallet or payment</option><option value="Other">Something else</option></select>
+          </label>
+          <label class="form-field">Describe the issue
+            <textarea name="message" rows="5" maxlength="1200" required placeholder="Please avoid sharing passwords, payment details, or other sensitive information."></textarea>
+          </label>
+          <label class="form-field">Your email (optional)
+            <input name="email" type="email" maxlength="160" autocomplete="email" placeholder="Only used in the email draft you open">
+          </label>
+          <button class="checkout-button" type="submit">Prepare support email</button>
+        </form>
+        <aside class="feature-card assistant-panel" aria-label="Customer care assistant">
+          <div class="assistant-profile">
+            <div class="assistant-portrait">
+              <svg viewBox="0 0 120 120" role="img" aria-label="Customer support representative wearing a headset and using a laptop">
+                <rect width="120" height="120" fill="#fff"/>
+                <g fill="none" stroke="#111" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M25 57V43a35 35 0 0 1 70 0v14"/>
+                  <path d="M24 43h8v20h-8a4 4 0 0 1-4-4V47a4 4 0 0 1 4-4zm64 0h8a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4h-8z"/>
+                  <path d="M33 53c0-18 10-29 27-29s27 11 27 29v15c0 9-5 16-12 20"/>
+                  <path d="M39 49c5-1 11-5 15-11 7 6 15 10 26 11v12c0 14-9 24-21 24S39 75 39 61z" fill="#fff"/>
+                  <path d="M42 90v-8m37 8v-8"/>
+                  <path d="M68 73h8c4 0 7-3 7-7v-2"/>
+                  <path d="M83 64h7"/>
+                  <path d="M40 91c3-4 8-6 13-6h14c6 0 11 3 14 8l5 8H37z"/>
+                  <path d="M30 78h43l8 29H38z" fill="#111"/>
+                  <path d="M37 103h44v5H39a3 3 0 0 1-3-3v-2z"/>
+                  <path d="M51 83l8 10 8-10"/>
+                </g>
+                <circle cx="55" cy="93" r="3.5" fill="#fff"/>
+                <circle cx="55" cy="93" r="1.1" fill="#111"/>
+                <circle cx="60" cy="76" r="2" fill="#111"/>
+              </svg>
+            </div>
+            <div><h3>Mira</h3><div class="assistant-role">Customer care · Demo</div><span class="assistant-presence">Here to help</span></div>
+          </div>
+          <p class="assistant-note">Tell Mira what happened—she’ll help get the details straight, without the hold music.</p>
+          <div class="assistant-response" id="support-response" aria-live="polite"><span class="assistant-badge">SUPPORT PREVIEW</span><h3>We’re here to help</h3><p>Choose a topic and describe the problem. We’ll organize it into an email that you can edit and send yourself.</p></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-row"><span><strong>InstaDROP</strong> · A local delivery storefront prototype for Shivpuri</span><span>Sample catalogue · Direct UPI handoff only · No payment verification, live tracking, or order fulfillment</span><span class="footer-credit">Powered by VisionDtashti</span></div></footer>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <script>
+    const products=[
+      {id:"tomatoes",name:"Tomatoes",detail:"Fresh · 500 g",price:28,category:"Fresh",emoji:"🍅",color:"#f8eeee",photo:"photo-1546094096-0df4bcaaa337"},
+      {id:"potatoes",name:"Potatoes",detail:"Fresh · 1 kg",price:34,category:"Fresh",emoji:"🥔",color:"#f5f0e8",photo:"photo-1518977676601-b53f82aba655"},
+      {id:"bananas",name:"Bananas",detail:"6 pieces",price:42,category:"Fresh",emoji:"🍌",color:"#fbf6e5",photo:"photo-1571771894821-ce9b6c11b08e"},
+      {id:"onions",name:"Onions",detail:"Fresh · 1 kg",price:38,category:"Fresh",emoji:"🧅",color:"#f7eeee",photo:"photo-1508747703725-719777637510"},
+      {id:"milk",name:"Toned milk",detail:"1 litre · chilled",price:68,category:"Dairy",emoji:"🥛",color:"#eff5f8",photo:"photo-1563636619-e9143da7973b"},
+      {id:"curd",name:"Fresh curd",detail:"400 g",price:42,category:"Dairy",emoji:"🥣",color:"#f6f2eb",photo:"photo-1488477181946-6428a0291777"},
+      {id:"bread",name:"Sandwich bread",detail:"400 g · white",price:45,category:"Bakery",emoji:"🍞",color:"#f6f0e8",photo:"photo-1509440159596-0249088772ff"},
+      {id:"eggs",name:"Farm eggs",detail:"Pack of 6",price:58,category:"Dairy",emoji:"🥚",color:"#f5f1ea",photo:"photo-1518569656558-1f25e69d93d7",vegetarian:false},
+      {id:"parle-g",name:"Parle-G Gluco Biscuits",detail:"Original pack · 300 g",price:30,category:"Snacks",emoji:"🍪",color:"#f8f0e6",photoFile:"product-parle-g.jpg"},
+      {id:"good-day",name:"Britannia Good Day Butter",detail:"Butter cookies · 75 g",price:30,category:"Snacks",emoji:"🍪",color:"#f8f0e6",photoFile:"product-good-day.jpg"},
+      {id:"oreo",name:"Cadbury Oreo Original",detail:"Chocolate crème biscuits · 120 g",price:30,category:"Snacks",emoji:"🍪",color:"#eeeefa",photo:"photo-1558961363-fa8fdf82db35"},
+      {id:"maggi-noodles",name:"MAGGI 2-Minute Noodles Masala",detail:"Instant noodles · 70 g",price:14,category:"Snacks",emoji:"🍜",color:"#fbf2df",photoFile:"product-maggi.jpg"},
+      {id:"namkeen",name:"Sev namkeen",detail:"200 g · crunchy",price:55,category:"Snacks",emoji:"🥨",color:"#f8efe2",photo:"photo-1558961363-fa8fdf82db35"},
+      {id:"soap",name:"Bath soap",detail:"Pack of 3",price:99,category:"Household",emoji:"🧼",color:"#edf4f2",photo:"photo-1600857544200-b2f666a9a2ec"},
+      {id:"surf-excel",name:"Surf Excel Easy Wash",detail:"Laundry detergent powder · 500 g",price:72,category:"Household",emoji:"🫧",color:"#eef1f7",photo:"photo-1626806787461-102c1bfaaea1"}
+    ];
+    const localProducts=[
+      {id:"local-guava",name:"Seasonal guavas",detail:"Shivpuri area · 1 kg",price:60,category:"Local finds",emoji:"🍈",color:"#edf3e6",photo:"photo-1601493700631-2b16ec4b4716",source:"Local finds · sample listing"},
+      {id:"local-pulses",name:"Toor dal",detail:"Local shop preview · 1 kg",price:145,category:"Local finds",emoji:"🫘",color:"#f4efe5",photo:"photo-1515543904379-3d757afe72e4",source:"Local finds · sample listing"},
+      {id:"local-honey",name:"Forest honey",detail:"Local maker preview · 250 g",price:190,category:"Local finds",emoji:"🍯",color:"#f8f0df",photo:"photo-1587049352851-8d4e89133924",source:"Local finds · sample listing"},
+      {id:"local-coriander",name:"Fresh coriander",detail:"Nearby grower preview · bunch",price:20,category:"Local finds",emoji:"🌿",color:"#edf2e8",photo:"photo-1501004318641-b39e6451bec6",source:"Local finds · sample listing"},
+      {id:"local-papad",name:"Handmade papad",detail:"Neighbourhood maker preview · pack",price:75,category:"Local finds",emoji:"🥙",color:"#f5f0e8",photo:"photo-1604908176997-125f25cc6f3d",source:"Local finds · sample listing"},
+      {id:"local-chilli",name:"Red chilli powder",detail:"Local mill preview · 200 g",price:85,category:"Local finds",emoji:"🌶️",color:"#f5eaea",photo:"photo-1583454110551-21f2fa2afe61",source:"Local finds · sample listing"}
+    ];
+    const promotions=[
+      {tone:"city",kicker:"Made for Shivpuri",title:"Your fridge called.<br>It wants backup.",copy:"Everyday essentials from nearby shops. Your tomatoes can stop feeling lonely.",action:"Explore groceries"},
+      {tone:"farms",kicker:"A closer connection",title:"Local goodness.<br>Zero goat-chasing.",copy:"Meet the growers and makers in our sample local collection. The goats are off duty.",action:"Meet local makers",screen:"local"},
+      {tone:"food",kicker:"Good food, closer",title:"The dinner debate<br>ends here-ish.",copy:"Browse sample menus for the timeless answer to “what are we eating?”",action:"Explore food menus",screen:"food"},
+      {tone:"daily",kicker:"The everyday, made easier",title:"Laundry day called.<br>It needs detergent.",copy:"Fresh picks, dairy, bakery and home basics—fewer “we ran out” plot twists.",action:"Shop daily needs"},
+      {tone:"care",kicker:"Here when you need us",title:"Questions? Tell Mira.<br>No hold music.",copy:"Get help turning your issue into a tidy email draft. The elevator jazz is optional.",action:"Visit customer care",screen:"support"},
+      {tone:"business",kicker:"For Shivpuri businesses",title:"Your parcels deserve<br>less shop-floor Tetris.",copy:"Try a sample shipment estimate. No boxes were harmed in the making of this demo.",action:"Explore business delivery",screen:"commercial"}
+    ];
+    const restaurants=[
+      {id:"royal-kitchen",name:"The Royal Kitchen · sample listing",cuisine:"North Indian · Thalis · Vegetarian options",eta:"25–35 min",dishes:[{id:"royal-thali",name:"Veg thali",detail:"Sample menu item",price:180,emoji:"🍛"},{id:"royal-paneer",name:"Paneer curry",detail:"Sample menu item",price:210,emoji:"🥘"},{id:"royal-roti",name:"Roti basket",detail:"Sample menu item",price:60,emoji:"🫓"}]},
+      {id:"station-cafe",name:"Station Road Cafe · sample listing",cuisine:"Cafe · Sandwiches · Tea",eta:"20–30 min",dishes:[{id:"cafe-sandwich",name:"Grilled sandwich",detail:"Sample menu item",price:110,emoji:"🥪"},{id:"cafe-poha",name:"Indori poha",detail:"Sample menu item",price:65,emoji:"🍲"},{id:"cafe-tea",name:"Masala chai",detail:"Sample menu item",price:35,emoji:"☕"}]},
+      {id:"madhav-dhaba",name:"Madhav Dhaba · sample listing",cuisine:"Indian · Parathas · Comfort food",eta:"30–40 min",dishes:[{id:"dhaba-paratha",name:"Aloo paratha",detail:"Sample menu item",price:90,emoji:"🫓"},{id:"dhaba-dal",name:"Dal tadka",detail:"Sample menu item",price:145,emoji:"🍲"},{id:"dhaba-rice",name:"Jeera rice",detail:"Sample menu item",price:95,emoji:"🍚"}]}
+    ];
+    const categories=["All","Fresh","Dairy","Bakery","Snacks","Household"];
+    const money=value=>`₹${Number(value).toLocaleString("en-IN")}`;
+    const FREE_DELIVERY_MINIMUM=200;
+    const STANDARD_DELIVERY_CHARGE=25;
+    const safeRead=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+    let cart=safeRead("shivpuri-basket-cart",{});
+    let orders=safeRead("shivpuri-basket-orders",[]);
+    let shipments=safeRead("shivpuri-basket-shipments",[]);
+    let walletBalance=Number(safeRead("shivpuri-basket-demo-wallet",0));
+    let addresses=safeRead("shivpuri-basket-addresses",[]);
+    let profile=safeRead("instadrop-profile",null);
+    let vegMode=Boolean(safeRead("shivpuri-basket-veg-mode",false));
+    let fastDelivery=Boolean(safeRead("shivpuri-basket-fast-delivery",false));
+    let deliveryFee=30;
+    const upiId="8640058700@axl";
+    let pendingCheckout=null;
+    if(!Array.isArray(addresses))addresses=[];
+    if(!profile||typeof profile!=="object"||Array.isArray(profile)||typeof profile.name!=="string"||typeof profile.address!=="string"||typeof profile.occupation!=="string")profile=null;
+    let profileCoordinates=profile?.coordinates&&typeof profile.coordinates==="object"&&Number.isFinite(profile.coordinates.latitude)&&Number.isFinite(profile.coordinates.longitude)?profile.coordinates:null;
+    let profilePhotoDataUrl=typeof profile?.photo==="string"&&profile.photo.startsWith("data:image/jpeg;base64,")&&profile.photo.length<=100000?profile.photo:"";
+    if(!Number.isFinite(walletBalance)||walletBalance<0)walletBalance=0;
+    let activeCategory="All";
+    let activeScreen=location.hash.slice(1)||"shop";
+    const availableThemes=["bright","dark","ocean","forest","sunset"];
+    let activeTheme=safeRead("instadrop-theme","bright");
+    if(!availableThemes.includes(activeTheme))activeTheme="bright";
+    function applyTheme(theme,saveChoice=false){
+      if(!availableThemes.includes(theme))return;
+      activeTheme=theme;
+      document.documentElement.dataset.theme=theme;
+      document.querySelectorAll("[data-theme-choice]").forEach(button=>{
+        const selected=button.dataset.themeChoice===theme;
+        button.setAttribute("aria-pressed",String(selected));
+        button.querySelector(".theme-check").textContent=selected?"✓":"";
+      });
+      document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue("--page-background").trim();
+      if(saveChoice){
+        try{localStorage.setItem("instadrop-theme",JSON.stringify(theme))}
+        catch(error){showToast("Theme changed, but could not save your choice in this browser.");console.error("Theme preference save failed:",error)}
+      }
+    }
+    function persist(){
+      try{
+        localStorage.setItem("shivpuri-basket-cart",JSON.stringify(cart));
+        localStorage.setItem("shivpuri-basket-orders",JSON.stringify(orders));
+        localStorage.setItem("shivpuri-basket-fast-delivery",JSON.stringify(fastDelivery));
+      }catch(error){showToast("Could not save your basket in this browser.");console.error("Local save failed:",error)}
+    }
+    function setScreen(name){
+      activeScreen=["shop","food","local","orders","tracking","account","commercial","wallet","support","delivery-settings","priority"].includes(name)?name:"shop";
+      document.querySelectorAll(".section-screen").forEach(section=>{section.hidden=section.id!==`screen-${activeScreen}`});
+      document.querySelectorAll(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.screen===activeScreen));
+      if(location.hash!==`#${activeScreen}`)history.replaceState(null,"",`#${activeScreen}`);
+      if(activeScreen==="shop")renderProducts();
+      if(activeScreen==="food")renderRestaurants();
+      if(activeScreen==="local")renderLocal();
+      if(activeScreen==="orders")renderOrders();
+      if(activeScreen==="tracking")renderTracking();
+      if(activeScreen==="account")renderAccount();
+      if(activeScreen==="commercial")renderShipments();
+      if(activeScreen==="delivery-settings")renderAddresses();
+      if(activeScreen==="priority")renderPriorityStatus();
+      renderWallet();
+    }
+    applyTheme(activeTheme);
+    let promotionIndex=0;
+    let promotionPaused=false;
+    function renderPromotion(){
+      const promotion=promotions[promotionIndex];
+      document.querySelector(".promo").dataset.tone=promotion.tone;
+      document.getElementById("promo-kicker").textContent=promotion.kicker;
+      document.getElementById("promo-title").innerHTML=promotion.title;
+      document.getElementById("promo-copy").textContent=promotion.copy;
+      document.getElementById("promo-action").textContent=promotion.action;
+      document.getElementById("promo-dots").innerHTML=promotions.map((item,index)=>`<button class="promo-dot" type="button" data-promo="${index}" aria-label="Show promotion ${index+1}" aria-current="${index===promotionIndex}"></button>`).join("");
+    }
+    function movePromotion(step){
+      promotionIndex=(promotionIndex+step+promotions.length)%promotions.length;
+      renderPromotion();
+    }
+    function visibleProducts(){
+      const term=document.getElementById("search-input").value.trim().toLowerCase();
+      const matchesCategory=product=>activeCategory==="All"||product.category===activeCategory||(activeCategory==="Daily"&&product.category==="Household");
+      return products.filter(product=>matchesCategory(product)&&(!vegMode||product.vegetarian!==false)&&(!term||`${product.name} ${product.detail} ${product.category}`.toLowerCase().includes(term)));
+    }
+    function renderCategories(){
+      document.getElementById("category-row").innerHTML=categories.map(category=>`<button class="category ${category===activeCategory?"active":""}" type="button" data-filter="${category}">${category}</button>`).join("");
+    }
+    function renderVegMode(){
+      document.querySelectorAll("[data-veg-mode]").forEach(input=>{input.checked=vegMode});
+      document.querySelectorAll(".veg-mode-label").forEach(label=>{label.textContent=vegMode?"On":"Off"});
+    }
+    function renderShopShelves(){
+      const shelves=[
+        {category:"Fresh",title:"Fruits & vegetables",caption:"Fresh picks for the week",emoji:"🥬"},
+        {category:"Dairy",title:"Dairy & eggs",caption:"Everyday chilled favourites",emoji:"🥛"},
+        {category:"Bakery",title:"Bakery",caption:"Breakfast starts here",emoji:"🍞"},
+        {category:"Snacks",title:"Snacks",caption:"For the “just one more” moment",emoji:"🍪"},
+        {category:"Daily",title:"Daily needs",caption:"Small home essentials",emoji:"🏠"}
+      ];
+      const root=document.getElementById("shelf-list");
+      root.innerHTML=shelves.map(shelf=>{
+        const items=products.filter(product=>(shelf.category==="Daily"?product.category==="Household":product.category===shelf.category)&&(!vegMode||product.vegetarian!==false));
+        const cards=items.map(product=>productCard(product)).join("");
+        return `<section class="product-shelf" aria-label="${shelf.title}"><div class="shelf-heading"><div><h3>${shelf.emoji} ${shelf.title}<small>${shelf.caption}</small></h3></div><button class="back-link" type="button" data-open-catalog="${shelf.category}">See all ›</button></div><div class="shelf-products">${cards}<button class="shelf-more" type="button" data-open-catalog="${shelf.category}"><span>＋</span>More ${shelf.title.toLowerCase()}</button></div></section>`;
+      }).join("");
+      enablePhotoFallbacks(root);
+    }
+    function productCard(product,local=false){
+      const quantity=cart[product.id]?.quantity||0;
+      const label=local?"Local preview":product.photoFile?"Product package":"Illustrative photo";
+      const vegBadge=product.vegetarian===false?'<span class="food-mark non-veg-mark" aria-label="Non-vegetarian">●</span>':'<span class="food-mark veg-mark" aria-label="Vegetarian">●</span>';
+      const photoSource=product.photoFile||`https://images.unsplash.com/${product.photo}?auto=format&amp;fit=crop&amp;w=520&amp;h=360&amp;q=78`;
+      const photoAlt=product.photoFile?`${product.name} package photo`:`${product.name} · illustrative photo`;
+      return `<article class="product-card"><span class="delivery-tag ${local?"local-tag":""}">${label}</span><div class="product-visual ${product.photoFile?"package-visual":""}" style="--visual:${product.color}"><img class="product-photo" src="${photoSource}" alt="${photoAlt}" loading="lazy" decoding="async"><span class="photo-fallback" aria-hidden="true"><span class="emoji-3d">${product.emoji}</span></span></div><div class="product-body"><h3 class="product-title">${vegBadge}${product.name}</h3><div class="product-detail">${product.detail}</div><div class="product-foot"><span class="price">${money(product.price)}</span>${quantity?quantityControl(product.id,quantity):`<button class="add-button" type="button" data-add="${product.id}">ADD</button>`}</div></div></article>`;
+    }
+    function quantityControl(id,quantity){
+      return `<span class="qty-control"><button type="button" data-change="${id}" data-delta="-1" aria-label="Remove one">−</button><strong>${quantity}</strong><button type="button" data-change="${id}" data-delta="1" aria-label="Add one">+</button></span>`;
+    }
+    function renderProducts(){
+      renderCategories();
+      const list=visibleProducts();
+      const titles={All:"Groceries","Daily":"Daily needs",Fresh:"Fruits & vegetables",Dairy:"Dairy & eggs",Bakery:"Bakery",Snacks:"Snacks",Household:"Daily needs"};
+      document.getElementById("selected-category-title").textContent=titles[activeCategory]||"Groceries";
+      document.getElementById("product-count").textContent=`${list.length} items`;
+      document.getElementById("product-grid").innerHTML=list.length?list.map(product=>productCard(product)).join(""):'<div class="empty-state"><strong>No items found</strong>Try another search or category.</div>';
+      enablePhotoFallbacks(document.getElementById("product-grid"));
+      renderBasket();
+    }
+    function chooseShopCategory(category){
+      activeCategory=category;
+      document.getElementById("category-picker").hidden=true;
+      document.getElementById("shopping-results").hidden=false;
+      renderProducts();
+      document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+    function openFullCatalog(category="All"){
+      chooseShopCategory(category);
+    }
+    function renderLocal(){
+      const term=document.getElementById("search-input").value.trim().toLowerCase();
+      const list=localProducts.filter(product=>(!vegMode||product.vegetarian!==false)&&(!term||`${product.name} ${product.detail}`.toLowerCase().includes(term)));
+      document.getElementById("local-grid").innerHTML=list.length?list.map(product=>productCard(product,true)).join(""):'<div class="empty-state"><strong>No local previews found</strong>Try another search.</div>';
+      enablePhotoFallbacks(document.getElementById("local-grid"));
+      renderBasket();
+    }
+    function enablePhotoFallbacks(container){
+      container.querySelectorAll(".product-photo").forEach(image=>image.addEventListener("error",()=>{
+        image.closest(".product-visual")?.classList.add("image-failed");
+      },{once:true}));
+    }
+    function renderRestaurants(){
+      const term=document.getElementById("search-input").value.trim().toLowerCase();
+      const available=restaurants.map(place=>({...place,dishes:place.dishes.filter(dish=>!vegMode||dish.vegetarian!==false)})).filter(place=>(place.dishes.length>0)&&(!term||`${place.name} ${place.cuisine} ${place.dishes.map(d=>d.name).join(" ")}`.toLowerCase().includes(term)));
+      document.getElementById("restaurant-list").innerHTML=available.length?available.map(place=>`<article class="restaurant-card"><div class="restaurant-top"><div><div class="restaurant-name">${place.name}</div><div class="restaurant-meta">${place.cuisine} · ${place.eta}</div></div><span class="partner-status">Sample · not connected</span></div><div class="restaurant-menu">${place.dishes.map(dish=>{const key=`${place.id}:${dish.id}`,quantity=cart[key]?.quantity||0;return `<div class="dish"><span><strong>${dish.emoji} ${dish.name}</strong><small>${dish.detail} · ${money(dish.price)}</small></span>${quantity?quantityControl(key,quantity):`<button class="add-button" type="button" data-dish="${dish.id}" data-place="${place.id}">ADD</button>`}</div>`}).join("")}</div></article>`).join(""):'<div class="empty-state"><strong>No sample menus found</strong>Try another search.</div>';
+      renderBasket();
+    }
+    function cartEntries(){return Object.entries(cart).filter(([,item])=>item.quantity>0)}
+    function totals(){
+      const subtotal=cartEntries().reduce((sum,[,item])=>sum+item.price*item.quantity,0);
+      const delivery=subtotal===0||subtotal>=FREE_DELIVERY_MINIMUM?0:STANDARD_DELIVERY_CHARGE;
+      const rush=fastDelivery&&subtotal>0?deliveryFee:0;
+      return {subtotal,delivery,rush,total:subtotal+delivery+rush};
+    }
+    function checkoutTotals(paymentMethod){
+      const base=totals();
+      const discount=paymentMethod==="upi"?Math.min(25,Math.round(base.subtotal*.05)):0;
+      return {...base,discount,payable:base.total-discount};
+    }
+    function renderCheckoutSummary(){
+      const {subtotal,delivery,rush,total}=totals();
+      document.getElementById("checkout-subtotal").textContent=money(subtotal);
+      document.getElementById("checkout-delivery").textContent=delivery?money(delivery):"Free";
+      document.getElementById("checkout-rush-row").hidden=rush===0;
+      document.getElementById("checkout-rush-amount").textContent=money(rush);
+      document.getElementById("checkout-total").textContent=money(total);
+      const progress=Math.min(100,subtotal/FREE_DELIVERY_MINIMUM*100);
+      const nudge=document.getElementById("free-delivery-nudge");
+      nudge.innerHTML=subtotal>=FREE_DELIVERY_MINIMUM
+        ?`<p><strong>Free delivery unlocked!</strong> Your items subtotal is ${money(subtotal)}.</p><div class="free-delivery-progress" role="progressbar" aria-label="Free delivery threshold reached" aria-valuemin="0" aria-valuemax="${FREE_DELIVERY_MINIMUM}" aria-valuenow="${FREE_DELIVERY_MINIMUM}"><span style="width:100%"></span></div>`
+        :`<p>Add <strong>${money(FREE_DELIVERY_MINIMUM-subtotal)} more</strong> to unlock free delivery. Delivery is ${money(delivery)} below ${money(FREE_DELIVERY_MINIMUM)}.</p><div class="free-delivery-progress" role="progressbar" aria-label="Progress toward free delivery" aria-valuemin="0" aria-valuemax="${FREE_DELIVERY_MINIMUM}" aria-valuenow="${Math.min(subtotal,FREE_DELIVERY_MINIMUM)}"><span style="width:${progress}%"></span></div><button class="secondary-button" type="button" id="add-more-for-free-delivery">Add more to get free delivery</button>`;
+      const selectedMethod=document.querySelector('[name="payment-method"]:checked')?.value;
+      if(selectedMethod)updateCheckoutPayment();
+    }
+    function renderBasket(){
+      const entries=cartEntries(),count=entries.reduce((sum,[,item])=>sum+item.quantity,0);
+      document.getElementById("cart-count").textContent=count;
+      const baskets=document.querySelectorAll(".basket");
+      if(!baskets.length)return;
+      if(!entries.length){
+        baskets.forEach(basket=>basket.innerHTML='<div class="basket-head"><h3>Your basket</h3></div><div class="basket-empty"><div class="empty-icon">🧺</div><strong>Your basket is empty</strong>Add a few things to get started.</div>');
+        return;
+      }
+      const {subtotal,delivery,rush,total}=totals();
+      baskets.forEach(basket=>basket.innerHTML=`<div class="basket-head"><h3>Your basket</h3><span>${count} item${count===1?"":"s"}</span></div><div class="basket-items">${entries.map(([id,item])=>`<div class="basket-item"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.source||"Groceries")} · ${money(item.price)} each</small><span class="basket-item-bottom"><button type="button" data-change="${escapeHtml(id)}" data-delta="-1" aria-label="Remove one ${escapeHtml(item.name)}">−</button><span>${item.quantity}</span><button type="button" data-change="${escapeHtml(id)}" data-delta="1" aria-label="Add one ${escapeHtml(item.name)}">+</button></span></span><strong>${money(item.price*item.quantity)}</strong></div>`).join("")}</div><div class="basket-totals"><div class="total-row"><span>Subtotal</span><span>${money(subtotal)}</span></div><div class="total-row"><span>Delivery charge</span><span>${delivery?money(delivery):"Free"}</span></div><label class="checkout-rush"><input type="checkbox" data-fast-delivery ${fastDelivery?"checked":""}><span><strong>Faster delivery</strong><br>Priority handling · +${money(deliveryFee)} (demo only)</span></label>${rush?`<div class="total-row"><span>Faster delivery</span><span>${money(rush)}</span></div>`:""}<div class="total-row grand"><span>Estimated total</span><span>${money(total)}</span></div><button class="checkout-button" type="button" data-checkout>Continue to checkout</button><div class="basket-hint">${subtotal<FREE_DELIVERY_MINIMUM?`Add ${money(FREE_DELIVERY_MINIMUM-subtotal)} more to get free delivery (minimum ${money(FREE_DELIVERY_MINIMUM)})`:`Free delivery unlocked at ${money(FREE_DELIVERY_MINIMUM)}`} · demo estimate only</div></div>`);
+    }
+    function addProduct(product,source="Groceries"){
+      const current=cart[product.id];
+      cart[product.id]={name:product.name,price:product.price,quantity:(current?.quantity||0)+1,source};
+      persist();renderProducts();renderShopShelves();renderRestaurants();renderLocal();
+    }
+    function changeQuantity(id,delta){
+      if(!cart[id])return;
+      cart[id].quantity+=delta;
+      if(cart[id].quantity<=0)delete cart[id];
+      if(!cartEntries().length)fastDelivery=false;
+      persist();renderProducts();renderShopShelves();renderRestaurants();renderLocal();
+    }
+    function renderOrders(){
+      const target=document.getElementById("orders-list");
+      target.innerHTML=orders.length?orders.slice().reverse().map(order=>`<article class="order-card"><div class="order-card-head"><strong>Request ${escapeHtml(order.id)}</strong><span class="order-status">${escapeHtml(order.status||"Demo request · not dispatched")}</span></div><p>${new Date(order.createdAt).toLocaleString()} · ${escapeHtml(order.location)}</p><p>${order.items.map(item=>`${escapeHtml(item.name)} × ${item.quantity}`).join(" · ")}</p><p><strong>${money(order.total)}</strong> · ${escapeHtml(order.paymentMethod||"Payment method not selected")}${order.discount?` · ${money(order.discount)} UPI offer preview`:""} · Payment status: ${escapeHtml(order.paymentStatus||"Not verified")}. This site did not send the request to a shop.</p><button class="secondary-button" type="button" data-track-request="${escapeHtml(order.id)}">Open tracking preview</button></article>`).join(""):'<div class="empty-state"><strong>No requests yet</strong>Your local demo requests will appear here.</div>';
+    }
+    function renderTracking(){
+      const location=profileCoordinates?`${profileCoordinates.latitude},${profileCoordinates.longitude}`:profile?.address||activeAddress()?.address||document.getElementById("delivery-location").value.trim()||"Shivpuri, Madhya Pradesh";
+      document.getElementById("tracking-map").src=`https://maps.google.com/maps?q=${encodeURIComponent(location)}&z=13&output=embed`;
+      const status=document.getElementById("tracking-order-status");
+      status.textContent=orders.length?`${orders.length} unpaid demo request${orders.length===1?" is":"s are"} saved on this device. None has been sent to a store or courier, so no delivery progress is available.`:"No demo requests are saved on this device. No live order status or courier location is available.";
+    }
+    async function shareCourierLocation(){
+      const status=document.getElementById("tracking-update");
+      if(!navigator.geolocation){status.textContent="This browser does not support location access.";return}
+      status.textContent="Requesting this device's location…";
+      navigator.geolocation.getCurrentPosition(async position=>{
+        const {latitude,longitude}=position.coords;
+        const mapUrl=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${latitude},${longitude}`)}`;
+        const link=document.getElementById("tracking-location-link");
+        link.href=mapUrl;
+        link.textContent="Open the latest shared location in Google Maps";
+        link.hidden=false;
+        document.getElementById("tracking-map").src=`https://maps.google.com/maps?q=${encodeURIComponent(`${latitude},${longitude}`)}&z=16&output=embed`;
+        status.textContent=`Location captured at ${new Date(position.timestamp).toLocaleTimeString()}. Share it again to send a later update.`;
+        if(navigator.share){
+          try{await navigator.share({title:"InstaDROP courier location update",text:"One-time location update. This link does not provide automatic live tracking.",url:mapUrl})}
+          catch(error){if(error.name!=="AbortError"){status.textContent="Location link is ready, but the share sheet could not be opened.";console.error("Courier location share failed:",error)}}
+        }else if(navigator.clipboard){
+          try{await navigator.clipboard.writeText(mapUrl);status.textContent="Location link copied. Send it to the customer; share again for a later update."}
+          catch(error){status.textContent="Location link is ready below. Copy and send it to the customer.";console.error("Courier location link copy failed:",error)}
+        }else{
+          status.textContent="Location link is ready below. Copy and send it to the customer.";
+        }
+      },error=>{
+        const messages={1:"Location permission was denied. Allow it in your browser settings to share a location.",2:"Your current location could not be determined.",3:"Location request timed out. Try again when the device has a better signal."};
+        status.textContent=messages[error.code]||"Could not get this device's location.";
+      },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+    }
+    function renderWallet(){
+      const balance=money(walletBalance);
+      document.getElementById("wallet-balance").textContent=balance;
+      document.getElementById("wallet-amount").textContent=balance;
+      document.getElementById("upi-id").textContent=upiId;
+      document.getElementById("open-upi-wallet").dataset.upiLink=upiPaymentLink(Number(document.getElementById("upi-amount").value)||99,"InstaDROP payment");
+    }
+    function upiPaymentLink(amount,note){
+      const params=new URLSearchParams({pa:upiId,pn:"InstaDROP",am:Number(amount).toFixed(2),cu:"INR",tn:note});
+      return `upi://pay?${params.toString()}`;
+    }
+    function activeAddress(){
+      const activeId=safeRead("shivpuri-basket-active-address","");
+      return addresses.find(address=>address.id===activeId)||addresses[0]||null;
+    }
+    function renderAddresses(){
+      const root=document.getElementById("address-list");
+      root.innerHTML=addresses.length?addresses.map(address=>{
+        const selected=activeAddress()?.id===address.id;
+        return `<label class="address-entry ${selected?"is-active":""}"><input type="radio" name="active-address" value="${escapeHtml(address.id)}" ${selected?"checked":""}><span><strong>${escapeHtml(address.label)}</strong><small>${escapeHtml(address.address)}</small></span></label>`;
+      }).join(""):'<div class="address-empty">No saved locations yet. Add a home or work address to make checkout quicker.</div>';
+      root.querySelectorAll('[name="active-address"]').forEach(input=>input.addEventListener("change",()=>selectAddress(input.value)));
+    }
+    const occupationOffers={
+      student:{title:"Student-friendly picks",items:["Affordable snacks and quick breakfasts","Dairy and pantry basics for busy study days"],category:"Snacks"},
+      salaried:{title:"Workday top-ups",items:["Easy breakfast and desk-time snacks","Household essentials for after-work restocks"],category:"Daily"},
+      business:{title:"For your shop or business",items:["Household and pantry stock-up ideas","Commercial delivery estimates for parcels"],screen:"commercial"},
+      farmer:{title:"Useful for farm days",items:["Fresh produce and hydration-friendly daily basics","Local finds from the community catalogue"],screen:"local"},
+      homemaker:{title:"Home restock ideas",items:["Fresh produce, dairy and bakery staples","Household basics for the next shopping list"],category:"Daily"},
+      healthcare:{title:"For busy shifts",items:["Quick snacks and breakfast basics","Dairy and everyday essentials"],category:"Snacks"},
+      education:{title:"For teaching days",items:["Tea-break snacks and bakery basics","Easy-to-restock classroom day essentials"],category:"Bakery"},
+      other:{title:"Everyday picks",items:["Fresh produce and pantry staples","Household basics from the sample catalogue"],category:"Fresh"}
+    };
+    function renderOfferPreview(target){
+      if(!profile){
+        target.innerHTML='<h3>Offers that fit your routine</h3><p>Set an occupation in My account to see tailored shopping suggestions. These are sample recommendations, not guaranteed discounts.</p><button class="secondary-button" type="button" data-screen="account">Set up my profile</button>';
+        return;
+      }
+      const offer=occupationOffers[profile.occupation]||occupationOffers.other;
+      const actions=offer.screen?`<button class="secondary-button" type="button" data-screen="${offer.screen}">Explore ${offer.screen==="commercial"?"business delivery":"local finds"}</button>`:`<button class="secondary-button" type="button" data-offer-category="${offer.category}">Browse matching items</button>`;
+      target.innerHTML=`<h3>${escapeHtml(offer.title)}${profile.name?`, ${escapeHtml(profile.name.split(/\s+/)[0])}`:""}</h3><p>Suggestions based on the occupation you selected. Sample ideas only—no occupation-based discount is active.</p><ul>${offer.items.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>${actions}`;
+    }
+    function setProfileMap(){
+      const address=profileCoordinates?`${profileCoordinates.latitude},${profileCoordinates.longitude}`:document.querySelector('#profile-form [name="address"]').value.trim()||"Shivpuri, Madhya Pradesh";
+      const query=encodeURIComponent(address);
+      document.getElementById("profile-map").src=`https://maps.google.com/maps?q=${query}&z=15&output=embed`;
+      document.getElementById("profile-map-link").href=`https://www.google.com/maps/search/?api=1&query=${query}`;
+    }
+    function updateProfilePhotoPreview(){
+      const preview=document.getElementById("profile-photo-preview");
+      const placeholder=document.getElementById("profile-photo-placeholder");
+      const clearButton=document.getElementById("profile-photo-clear");
+      const headerAvatar=document.getElementById("profile-button-avatar");
+      preview.hidden=!profilePhotoDataUrl;
+      placeholder.hidden=Boolean(profilePhotoDataUrl);
+      clearButton.hidden=!profilePhotoDataUrl;
+      headerAvatar.hidden=!profilePhotoDataUrl;
+      document.getElementById("profile-button-fallback").hidden=Boolean(profilePhotoDataUrl);
+      if(profilePhotoDataUrl){
+        preview.src=profilePhotoDataUrl;
+        headerAvatar.src=profilePhotoDataUrl;
+      }else{
+        preview.removeAttribute("src");
+        headerAvatar.removeAttribute("src");
+      }
+    }
+    function renderAccount(){
+      const form=document.getElementById("profile-form");
+      const occupationLabel=profile?Array.from(form.querySelector('[name="occupation"]').options).find(option=>option.value===profile.occupation)?.textContent||"Other":"";
+      form.querySelector('[name="name"]').value=profile?.name||"";
+      form.querySelector('[name="address"]').value=profile?.address||"";
+      form.querySelector('[name="occupation"]').value=profile?.occupation||"";
+      updateProfilePhotoPreview();
+      document.getElementById("profile-summary").innerHTML=profile?`<div class="profile-summary-content">${profilePhotoDataUrl?`<img class="profile-summary-avatar" src="${profilePhotoDataUrl}" alt="">`:'<span class="profile-summary-avatar profile-summary-avatar-fallback" aria-hidden="true">♙</span>'}<div><strong>${escapeHtml(profile.name)}</strong><span>${escapeHtml(occupationLabel)}</span><p>${escapeHtml(profile.address)}</p><small>${profileCoordinates?"Optional map location saved on this device.":"No GPS coordinates saved."}</small></div></div>`:"Add your details to create a local profile.";
+      document.getElementById("profile-location-status").textContent=profileCoordinates?"A location pin is saved on this device. Your street address is still used for delivery.":"Enter a delivery address, or optionally use this device's location.";
+      setProfileMap();
+      renderOfferPreview(document.getElementById("account-offers"));
+      renderOfferPreview(document.getElementById("shop-offers"));
+    }
+    function saveProfile(event){
+      event.preventDefault();
+      const form=new FormData(event.currentTarget);
+      const name=String(form.get("name")||"").trim();
+      const address=String(form.get("address")||"").trim();
+      const occupation=String(form.get("occupation")||"");
+      if(!name||!address||!occupation){showToast("Enter your name, delivery address, and occupation.");return}
+      const saved={name,address,occupation,coordinates:profileCoordinates,photo:profilePhotoDataUrl};
+      try{localStorage.setItem("instadrop-profile",JSON.stringify(saved))}
+      catch(error){showToast("Could not save your profile in this browser.");console.error("Profile save failed:",error);return}
+      profile=saved;
+      renderAccount();
+      showToast("Profile saved on this device. Your suggestions are ready.");
+    }
+    async function handleProfilePhoto(event){
+      const input=event.currentTarget;
+      const file=input.files?.[0];
+      if(!file)return;
+      if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+        input.value="";
+        showToast("Choose a JPG, PNG, or WebP image.");
+        return;
+      }
+      if(file.size>5*1024*1024){
+        input.value="";
+        showToast("Choose an image smaller than 5 MB.");
+        return;
+      }
+      const imageUrl=URL.createObjectURL(file);
+      const image=new Image();
+      image.onload=()=>{
+        URL.revokeObjectURL(imageUrl);
+        const canvas=document.createElement("canvas");
+        const size=Math.min(image.naturalWidth,image.naturalHeight);
+        const left=(image.naturalWidth-size)/2;
+        const top=(image.naturalHeight-size)/2;
+        canvas.width=256;
+        canvas.height=256;
+        const context=canvas.getContext("2d");
+        if(!context){
+          input.value="";
+          showToast("This browser could not prepare the profile photo.");
+          return;
+        }
+        context.drawImage(image,left,top,size,size,0,0,256,256);
+        profilePhotoDataUrl=canvas.toDataURL("image/jpeg",0.82);
+        updateProfilePhotoPreview();
+        showToast("Photo ready. Save your profile to keep it on this device.");
+      };
+      image.onerror=()=>{
+        URL.revokeObjectURL(imageUrl);
+        input.value="";
+        showToast("This image could not be opened. Try another photo.");
+      };
+      image.src=imageUrl;
+    }
+    function removeProfilePhoto(){
+      profilePhotoDataUrl="";
+      document.getElementById("profile-photo-input").value="";
+      updateProfilePhotoPreview();
+      showToast("Photo removed. Save your profile to keep this change.");
+    }
+    function useProfileLocation(){
+      const status=document.getElementById("profile-location-status");
+      if(!navigator.geolocation){status.textContent="This browser does not support location access. Enter your address manually.";return}
+      status.textContent="Requesting this device's location. Allow access in your browser if prompted…";
+      navigator.geolocation.getCurrentPosition(position=>{
+        profileCoordinates={latitude:position.coords.latitude,longitude:position.coords.longitude};
+        status.textContent="Map pin found. Enter or confirm your full street address, then save your profile.";
+        setProfileMap();
+      },error=>{
+        const messages={1:"Location permission was denied. You can still enter your address manually.",2:"Your current location could not be determined. Try again or enter your address.",3:"Location request timed out. Try again or enter your address."};
+        status.textContent=messages[error.code]||"Could not get this device's location. Enter your address manually.";
+      },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+    }
+    function escapeHtml(value){
+      const element=document.createElement("span");
+      element.textContent=String(value);
+      return element.innerHTML;
+    }
+    function selectAddress(id){
+      const address=addresses.find(item=>item.id===id);
+      if(!address)return;
+      try{
+        localStorage.setItem("shivpuri-basket-active-address",id);
+        localStorage.setItem("shivpuri-basket-location",address.label);
+      }catch(error){showToast("Could not save your selected location.");console.error("Active address save failed:",error)}
+      document.getElementById("delivery-location").value=address.label;
+      renderAddresses();
+    }
+    function saveAddress(event){
+      event.preventDefault();
+      const form=new FormData(event.currentTarget);
+      const label=String(form.get("label")||"").trim();
+      const address=String(form.get("address")||"").trim();
+      if(!label||!address)return;
+      const saved={id:`address-${Date.now()}`,label,address};
+      addresses.push(saved);
+      try{
+        localStorage.setItem("shivpuri-basket-addresses",JSON.stringify(addresses));
+        if(addresses.length===1)localStorage.setItem("shivpuri-basket-active-address",saved.id);
+      }catch(error){addresses.pop();showToast("Could not save this location in your browser.");console.error("Address save failed:",error);return}
+      if(addresses.length===1)selectAddress(saved.id);
+      event.currentTarget.reset();
+      renderAddresses();
+      showToast("Delivery location saved on this device.");
+    }
+    function renderPriorityStatus(){
+      document.getElementById("priority-status").textContent="Preview only. Membership and priority delivery are not activated in this demo.";
+    }
+    function renderShipments(){
+      const target=document.getElementById("shipment-list");
+      target.innerHTML=shipments.length?shipments.slice().reverse().map(shipment=>{
+        const route=shipment.origin&&shipment.destination?`<p><strong>Pickup:</strong> ${escapeHtml(shipment.origin)}<br><strong>Destination:</strong> ${escapeHtml(shipment.destination)}</p><a class="secondary-button" href="${shipmentRouteUrl(shipment.origin,shipment.destination)}" target="_blank" rel="noopener noreferrer">View route in Google Maps</a>`:"";
+        return `<article class="order-card shipment-record"><strong>Estimate ${escapeHtml(shipment.id)}</strong>${route}<p>${escapeHtml(shipment.type)} · ${escapeHtml(String(shipment.weight))} kg · approx. ${escapeHtml(String(shipment.distance))} km</p><p><strong>${money(shipment.estimate)}</strong> · Estimate only; no courier booked.</p></article>`;
+      }).join(""):'';
+    }
+    function shipmentRouteUrl(origin,destination){
+      const params=new URLSearchParams({api:"1",origin,destination,travelmode:"driving"});
+      return `https://www.google.com/maps/dir/?${params.toString()}`;
+    }
+    function prepareSupportEmail(event){
+      event.preventDefault();
+      const form=new FormData(event.currentTarget);
+      const topic=String(form.get("topic")||"Other");
+      const message=String(form.get("message")||"").trim();
+      const email=String(form.get("email")||"").trim();
+      if(!message){showToast("Please describe the issue first.");return}
+      const subject=`InstaDROP demo support: ${topic}`;
+      const body=[`Topic: ${topic}`,`Delivery area: ${document.getElementById("delivery-location").value.trim()||"Shivpuri, MP"}`,email?`Reply-to: ${email}`:"","",message,"","Prepared from the InstaDROP prototype. Please review before sending."].filter(Boolean).join("\n");
+      const response=document.getElementById("support-response");
+      response.replaceChildren();
+      const icon=document.createElement("span");icon.className="feature-icon";icon.textContent="✉️";
+      const heading=document.createElement("h3");heading.textContent="Your draft is ready";
+      const summary=document.createElement("p");summary.textContent=`We organized your ${topic.toLowerCase()} issue. Nothing has been sent; your mail app will open with an editable draft.`;
+      const link=document.createElement("a");link.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;link.textContent="Review email draft";
+      response.append(icon,heading,summary,link);
+    }
+    function saveShipment(event){
+      event.preventDefault();
+      const form=new FormData(event.currentTarget);
+      const origin=String(form.get("origin")||"").trim();
+      const destination=String(form.get("destination")||"").trim();
+      const type=String(form.get("shipment"));
+      const weight=Number(form.get("weight"));
+      const distance=Number(form.get("distance"));
+      if(!origin||!destination||!Number.isFinite(weight)||weight<0.1||weight>100||!Number.isFinite(distance)||distance<1||distance>500){
+        document.getElementById("shipment-result").textContent="Enter both addresses, a weight from 0.1–100 kg, and a route distance from 1–500 km.";
+        return;
+      }
+      const typeMultiplier={document:1,small:1.2,business:1.5}[type]||1;
+      const estimate=Math.round((30+distance*4+weight*8)*typeMultiplier);
+      const shipment={id:`DEMO-${Date.now().toString().slice(-6)}`,origin,destination,type,weight,distance,estimate};
+      shipments.push(shipment);
+      try{localStorage.setItem("shivpuri-basket-shipments",JSON.stringify(shipments))}catch(error){showToast("Could not save this demo estimate in your browser.");console.error("Shipment estimate save failed:",error)}
+      const result=document.getElementById("shipment-result");
+      result.replaceChildren();
+      const summary=document.createElement("p");
+      summary.textContent=`${origin} → ${destination} · Indicative demo estimate: ${money(estimate)}. No pickup is booked.`;
+      const route=document.createElement("a");
+      route.className="secondary-button";
+      route.href=shipmentRouteUrl(origin,destination);
+      route.target="_blank";
+      route.rel="noopener noreferrer";
+      route.textContent="View route in Google Maps";
+      result.append(summary,route);
+      renderShipments();
+    }
+    function showCheckout(){
+      if(!cartEntries().length)return;
+      pendingCheckout=null;
+      const savedAddress=profile?.address||activeAddress()?.address||"";
+      const savedName=profile?.name||"";
+      document.getElementById("modal-root").innerHTML=`<div class="modal-backdrop" id="checkout-backdrop"><div class="checkout-modal"><form id="checkout-form" novalidate><h2>Delivery details</h2><p>Add your contact and address, then choose how you want to pay.</p><div class="form-grid"><label class="form-field">Name<input name="name" required maxlength="80" autocomplete="name" placeholder="Your name" value="${escapeHtml(savedName)}"></label><label class="form-field">Mobile number<input name="phone" required inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit number"></label><label class="form-field wide">Delivery address<textarea name="address" required maxlength="300" autocomplete="street-address" placeholder="House, street, area">${escapeHtml(savedAddress)}</textarea></label></div><div id="free-delivery-nudge" class="free-delivery-nudge"></div><label class="checkout-rush"><input type="checkbox" name="fastDelivery" ${fastDelivery?"checked":""}><span><strong>Faster delivery</strong><br>Priority handling · +${money(deliveryFee)} (demo only)</span></label><div class="checkout-summary"><div class="total-row"><span>Items subtotal</span><span id="checkout-subtotal"></span></div><div class="total-row"><span>Delivery charge</span><span id="checkout-delivery"></span></div><div class="total-row" id="checkout-rush-row"><span>Faster delivery</span><span id="checkout-rush-amount"></span></div><div class="total-row grand"><span>Estimated total before payment offer</span><strong id="checkout-total"></strong></div></div><div class="form-error" id="form-error" role="alert"></div><div class="modal-actions"><button class="secondary-button" type="button" id="cancel-checkout">Back to basket</button><button class="checkout-button" style="width:auto" type="submit">Continue to payment</button></div></form><section class="checkout-payment-step" id="checkout-payment-step" hidden><h2>Choose payment method</h2><p>Pick one option for this demo checkout.</p><div class="checkout-methods"><label class="checkout-method"><input type="radio" name="payment-method" value="upi"><span><strong>Pay instantly with UPI <span class="upi-offer">5% off up to ₹25</span></strong><small>Direct UPI app handoff · discount is a demo offer only</small></span></label><label class="checkout-method"><input type="radio" name="payment-method" value="cod"><span><strong>Cash on Delivery</strong><small>Pay cash at the door · shown as a demo request only</small></span></label></div><div class="checkout-summary"><div class="total-row"><span>Items subtotal</span><span id="payment-subtotal"></span></div><div class="total-row"><span>Delivery charge</span><span id="payment-delivery"></span></div><div class="total-row" id="payment-rush-row"><span>Faster delivery</span><span id="payment-rush"></span></div><div class="total-row"><span>Subtotal with charges</span><span id="payment-base-total"></span></div><div class="total-row" id="payment-discount-row" hidden><span>UPI offer (5%, up to ₹25)</span><strong id="payment-discount"></strong></div><div class="total-row grand"><span>Estimated amount</span><strong id="payment-payable"></strong></div></div><div class="form-error" id="payment-error" role="alert"></div><div class="payment-method-details" id="upi-payment-details" hidden><p class="checkout-payment-note">Verify the recipient and amount in your UPI app before authorizing. This site cannot verify a transfer or process an order.</p><div class="checkout-upi-summary"><strong id="checkout-upi-total"></strong><span>Payee: ${upiId}</span></div><img src="upi-payment-qr.jpeg" class="upi-qr" alt="UPI payment QR code supplied by the account owner"><a class="checkout-button checkout-upi-link" id="checkout-upi-link" href="#">Open UPI app</a><p class="payment-caveat">After returning, you can save an unpaid demo request here. No payment is confirmed by the website.</p><button class="secondary-button" type="button" id="save-demo-request">Save UPI demo request</button></div><div class="payment-method-details" id="cod-payment-details" hidden><p class="checkout-payment-note">Cash on delivery is presented as a prototype option. This request is saved on your device only; no shop or courier will receive it.</p><button class="checkout-button" type="button" id="save-cod-request">Save COD demo request</button></div><div class="modal-actions"><button class="secondary-button" type="button" id="back-to-details">Back to delivery details</button></div></section></div></div>`;
+      document.getElementById("free-delivery-nudge").addEventListener("click",event=>{
+        if(!event.target.closest("#add-more-for-free-delivery"))return;
+        closeCheckout();
+        setScreen("shop");
+        document.getElementById("category-picker").hidden=false;
+        document.getElementById("shopping-results").hidden=true;
+        document.getElementById("category-picker").scrollIntoView({behavior:"smooth",block:"start"});
+      });
+      renderCheckoutSummary();
+      document.getElementById("cancel-checkout").addEventListener("click",closeCheckout);
+      document.getElementById("checkout-backdrop").addEventListener("click",event=>{if(event.target.id==="checkout-backdrop")closeCheckout()});
+      document.getElementById("checkout-form").addEventListener("submit",submitOrder);
+      document.querySelector('#checkout-form [name="fastDelivery"]').addEventListener("change",event=>{
+        fastDelivery=event.target.checked;persist();renderBasket();
+        renderCheckoutSummary();
+      });
+      document.querySelectorAll('[name="payment-method"]').forEach(input=>input.addEventListener("change",updateCheckoutPayment));
+      document.getElementById("save-demo-request").addEventListener("click",()=>saveDemoRequest("upi"));
+      document.getElementById("save-cod-request").addEventListener("click",()=>saveDemoRequest("cod"));
+      document.getElementById("back-to-details").addEventListener("click",()=>{
+        document.getElementById("checkout-payment-step").hidden=true;
+        document.getElementById("checkout-form").hidden=false;
+      });
+      document.querySelector('#checkout-form [name="name"]').focus();
+    }
+    function closeCheckout(){document.getElementById("modal-root").innerHTML=""}
+    function submitOrder(event){
+      event.preventDefault();
+      const form=new FormData(event.currentTarget);
+      if(!String(form.get("name")||"").trim()){document.getElementById("form-error").textContent="Enter your name.";return}
+      const phone=String(form.get("phone")||"").replace(/\D/g,"");
+      if(phone.length!==10){document.getElementById("form-error").textContent="Enter a 10-digit mobile number.";return}
+      if(!String(form.get("address")||"").trim()){document.getElementById("form-error").textContent="Enter your delivery address.";return}
+      const id=`ID-${Date.now().toString().slice(-7)}`;
+      pendingCheckout={id,createdAt:new Date().toISOString(),location:String(form.get("address")).trim(),items:cartEntries().map(([,item])=>({...item})),fastDelivery};
+      const paymentStep=document.getElementById("checkout-payment-step");
+      document.getElementById("checkout-form").hidden=true;
+      paymentStep.hidden=false;
+    }
+    function updateCheckoutPayment(){
+      const method=document.querySelector('[name="payment-method"]:checked')?.value;
+      const upiDetails=document.getElementById("upi-payment-details");
+      const codDetails=document.getElementById("cod-payment-details");
+      upiDetails.hidden=method!=="upi";
+      codDetails.hidden=method!=="cod";
+      if(!method)return;
+      const amounts=checkoutTotals(method);
+      document.getElementById("payment-subtotal").textContent=money(amounts.subtotal);
+      document.getElementById("payment-delivery").textContent=amounts.delivery?money(amounts.delivery):"Free";
+      document.getElementById("payment-rush-row").hidden=amounts.rush===0;
+      document.getElementById("payment-rush").textContent=money(amounts.rush);
+      document.getElementById("payment-base-total").textContent=money(amounts.total);
+      document.getElementById("payment-discount-row").hidden=amounts.discount===0;
+      document.getElementById("payment-discount").textContent=`−${money(amounts.discount)}`;
+      document.getElementById("payment-payable").textContent=money(amounts.payable);
+      if(method==="upi"){
+        document.getElementById("checkout-upi-total").textContent=`Pay ${money(amounts.payable)}`;
+        const link=document.getElementById("checkout-upi-link");
+        link.href=upiPaymentLink(amounts.payable,`InstaDROP ${pendingCheckout.id}`);
+        link.textContent=`Open UPI app to pay ${money(amounts.payable)}`;
+      }
+    }
+    function saveDemoRequest(method){
+      if(!pendingCheckout)return;
+      const amounts=checkoutTotals(method);
+      const isUpi=method==="upi";
+      orders.push({...pendingCheckout,paymentMethod:isUpi?"UPI":"Cash on Delivery",discount:amounts.discount,total:amounts.payable,status:isUpi?"UPI demo request · payment not verified · not sent":"COD demo request · not sent",paymentStatus:isUpi?"Not verified":"Cash on delivery · not collected"});
+      cart={};fastDelivery=false;
+      persist();closeCheckout();setScreen("orders");
+      showToast(isUpi?"UPI demo request saved here only. Payment and delivery are not confirmed.":"COD demo request saved here only. No payment or delivery was confirmed.");
+    }
+    let toastTimer;
+    function showToast(message){
+      const root=document.getElementById("toast-root");
+      root.innerHTML=`<div class="toast" role="status">${message}</div>`;
+      window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>root.replaceChildren(),4000);
+    }
+    document.querySelectorAll("[data-theme-choice]").forEach(button=>button.addEventListener("click",()=>applyTheme(button.dataset.themeChoice,true)));
+    document.querySelectorAll(".nav-button,[data-screen]").forEach(button=>button.addEventListener("click",()=>setScreen(button.dataset.screen)));
+    document.getElementById("orders-list").addEventListener("click",event=>{
+      if(event.target.closest("[data-track-request]"))setScreen("tracking");
+    });
+    document.getElementById("share-courier-location").addEventListener("click",shareCourierLocation);
+    document.querySelectorAll("[data-open-screen]").forEach(button=>button.addEventListener("click",()=>setScreen(button.dataset.openScreen)));
+    document.querySelectorAll("[data-open-catalog]").forEach(button=>button.addEventListener("click",()=>openFullCatalog(button.dataset.openCatalog)));
+    document.getElementById("search-input").addEventListener("input",()=>{
+      if(activeScreen==="shop"&&document.getElementById("search-input").value.trim()){
+        activeCategory="All";
+        document.getElementById("category-picker").hidden=true;
+        document.getElementById("shopping-results").hidden=false;
+      }
+      renderProducts();renderRestaurants();renderLocal();
+    });
+    document.getElementById("category-row").addEventListener("click",event=>{
+      const button=event.target.closest("[data-filter]");if(!button)return;activeCategory=button.dataset.filter;renderProducts();
+    });
+    document.getElementById("shelf-list").addEventListener("click",event=>{
+      const add=event.target.closest("[data-add]");
+      if(add){const product=products.find(item=>item.id===add.dataset.add);if(product)addProduct(product);return}
+      const change=event.target.closest("[data-change]");
+      if(change){changeQuantity(change.dataset.change,Number(change.dataset.delta));return}
+      const catalog=event.target.closest("[data-open-catalog]");
+      if(catalog)openFullCatalog(catalog.dataset.openCatalog);
+    });
+    document.getElementById("back-to-categories").addEventListener("click",()=>{
+      document.getElementById("shopping-results").hidden=true;
+      document.getElementById("category-picker").hidden=false;
+      activeCategory="All";
+      document.getElementById("search-input").value="";
+    });
+    document.querySelector("[data-scroll]").addEventListener("click",()=>chooseShopCategory("All"));
+    document.getElementById("product-grid").addEventListener("click",event=>{
+      const add=event.target.closest("[data-add]");if(add){const product=products.find(item=>item.id===add.dataset.add);if(product)addProduct(product);return}
+      const change=event.target.closest("[data-change]");if(change)changeQuantity(change.dataset.change,Number(change.dataset.delta));
+    });
+    document.getElementById("restaurant-list").addEventListener("click",event=>{
+      const add=event.target.closest("[data-dish]");if(add){const place=restaurants.find(item=>item.id===add.dataset.place),dish=place?.dishes.find(item=>item.id===add.dataset.dish);if(place&&dish)addProduct({id:`${place.id}:${dish.id}`,name:dish.name,price:dish.price},place.name);return}
+      const change=event.target.closest("[data-change]");if(change)changeQuantity(change.dataset.change,Number(change.dataset.delta));
+    });
+    document.getElementById("local-grid").addEventListener("click",event=>{
+      const add=event.target.closest("[data-add]");
+      if(add){const product=localProducts.find(item=>item.id===add.dataset.add);if(product)addProduct(product,"Local finds · sample listing");return}
+      const change=event.target.closest("[data-change]");if(change)changeQuantity(change.dataset.change,Number(change.dataset.delta));
+    });
+    document.getElementById("cart-button").addEventListener("click",()=>{
+      if(!cartEntries().length){showToast("Your basket is empty. Add something you like first.");return}
+      showCheckout();
+    });
+    document.querySelectorAll(".basket").forEach(basket=>{
+      basket.addEventListener("click",event=>{if(event.target.closest("[data-checkout]"))showCheckout();const change=event.target.closest("[data-change]");if(change)changeQuantity(change.dataset.change,Number(change.dataset.delta))});
+      basket.addEventListener("change",event=>{
+        if(!event.target.matches("[data-fast-delivery]"))return;
+        fastDelivery=event.target.checked;persist();renderBasket();
+      });
+    });
+    document.getElementById("promo-dots").addEventListener("click",event=>{
+      const dot=event.target.closest("[data-promo]");if(!dot)return;
+      promotionIndex=Number(dot.dataset.promo);renderPromotion();
+    });
+    document.getElementById("promo-prev").addEventListener("click",()=>movePromotion(-1));
+    document.getElementById("promo-next").addEventListener("click",()=>movePromotion(1));
+    document.getElementById("promo-action").addEventListener("click",()=>{
+      const promotion=promotions[promotionIndex];
+      if(promotion.screen){setScreen(promotion.screen);return}
+      chooseShopCategory(promotion.tone==="daily"?"Daily":"All");
+    });
+    const promo=document.querySelector(".promo");
+    promo.addEventListener("pointerenter",()=>promotionPaused=true);
+    promo.addEventListener("pointerleave",()=>promotionPaused=false);
+    promo.addEventListener("focusin",()=>promotionPaused=true);
+    promo.addEventListener("focusout",event=>{if(!promo.contains(event.relatedTarget))promotionPaused=false});
+    document.addEventListener("visibilitychange",()=>{promotionPaused=document.hidden||promo.matches(":hover")||promo.contains(document.activeElement)});
+    document.getElementById("delivery-location").addEventListener("change",event=>{
+      const location=event.target.value.trim()||"Shivpuri, MP";event.target.value=location;
+      try{localStorage.setItem("shivpuri-basket-location",location)}catch(error){showToast("Could not save your delivery area.");console.error("Location save failed:",error)}
+    });
+    document.getElementById("address-form").addEventListener("submit",saveAddress);
+    document.getElementById("profile-form").addEventListener("submit",saveProfile);
+    document.getElementById("profile-photo-input").addEventListener("change",handleProfilePhoto);
+    document.getElementById("profile-photo-clear").addEventListener("click",removeProfilePhoto);
+    document.getElementById("profile-use-location").addEventListener("click",useProfileLocation);
+    document.querySelector('#profile-form [name="address"]').addEventListener("input",()=>{
+      profileCoordinates=null;
+      document.getElementById("profile-location-status").textContent="Address changed. Use location again if you want to save a map pin.";
+      setProfileMap();
+    });
+    document.querySelectorAll("#shop-offers,#account-offers").forEach(target=>target.addEventListener("click",event=>{
+      const categoryButton=event.target.closest("[data-offer-category]");
+      if(categoryButton){setScreen("shop");chooseShopCategory(categoryButton.dataset.offerCategory);return}
+      const screenButton=event.target.closest("[data-screen]");
+      if(screenButton)setScreen(screenButton.dataset.screen);
+    }));
+    document.querySelectorAll("[data-veg-mode]").forEach(input=>input.addEventListener("change",event=>{
+      vegMode=event.target.checked;
+      try{localStorage.setItem("shivpuri-basket-veg-mode",JSON.stringify(vegMode))}catch(error){showToast("Could not save your veg-mode preference.");console.error("Veg-mode preference save failed:",error)}
+      renderVegMode();renderShopShelves();renderProducts();renderRestaurants();renderLocal();
+    }));
+    document.getElementById("upi-amount").addEventListener("input",()=>renderWallet());
+    document.getElementById("open-upi-wallet").addEventListener("click",event=>{
+      const amount=Number(document.getElementById("upi-amount").value);
+      if(!Number.isFinite(amount)||amount<1||amount>100000){showToast("Enter an amount between ₹1 and ₹1,00,000.");return}
+      window.location.href=upiPaymentLink(amount,"InstaDROP payment");
+    });
+    document.getElementById("copy-upi").addEventListener("click",async()=>{
+      try{await navigator.clipboard.writeText(upiId);showToast("UPI ID copied. Verify the payee before paying.");}
+      catch(error){showToast("Clipboard access is unavailable here. Select the UPI ID and copy it manually.");console.error("UPI ID clipboard copy failed:",error)}
+    });
+    document.getElementById("priority-subscribe").addEventListener("click",()=>{
+      document.getElementById("upi-amount").value="99";
+      renderWallet();setScreen("wallet");
+      showToast("Priority Pass is only a concept; a UPI transfer will not activate membership.");
+    });
+    document.getElementById("support-form").addEventListener("submit",prepareSupportEmail);
+    document.getElementById("shipment-form").addEventListener("submit",saveShipment);
+    document.querySelector(".wallet-actions").addEventListener("click",event=>{
+      const add=event.target.closest("[data-wallet-add]");
+      if(add){
+        walletBalance+=Number(add.dataset.walletAdd);
+        try{localStorage.setItem("shivpuri-basket-demo-wallet",JSON.stringify(walletBalance))}catch(error){showToast("Could not save demo credits in this browser.");console.error("Demo wallet save failed:",error)}
+        renderWallet();showToast("Demo credits added. No money was charged.");
+      }
+      if(event.target.closest("#wallet-reset")){
+        walletBalance=0;
+        try{localStorage.setItem("shivpuri-basket-demo-wallet","0")}catch(error){showToast("Could not reset the demo balance.");console.error("Demo wallet reset failed:",error)}
+        renderWallet();showToast("Demo wallet reset. No money was moved.");
+      }
+    });
+    window.addEventListener("hashchange",()=>setScreen(location.hash.slice(1)));
+    try{document.getElementById("delivery-location").value=localStorage.getItem("shivpuri-basket-location")||"Shivpuri, MP"}catch(error){document.getElementById("delivery-location").value="Shivpuri, MP";console.error("Could not load delivery area:",error)}
+    renderPromotion();
+    if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)window.setInterval(()=>{if(!promotionPaused)movePromotion(1)},7000);
+    renderOfferPreview(document.getElementById("shop-offers"));
+    updateProfilePhotoPreview();renderProducts();renderShopShelves();renderRestaurants();renderLocal();renderWallet();renderVegMode();renderAddresses();setScreen(activeScreen);
+  </script>
+</body>
+</html>
